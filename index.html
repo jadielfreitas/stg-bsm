@@ -341,9 +341,10 @@ textarea.inp{min-height:68px;line-height:1.6;}
    ══════════════════════════════════════════════════════════════════════ */
 
 /* ── SUPABASE CONFIG ─────────────────────────────────────────────────── */
-const SUPA_URL  = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
-const SUPA_KEY  = 'YOUR_ANON_KEY_HERE'; // Cole sua anon key aqui
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+const SUPABASE_URL  = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ── LOCAL PERSISTENCE ──────────────────────────────────────────────── */
 const LS_KEY = 'stg_bsm_os_v2';
