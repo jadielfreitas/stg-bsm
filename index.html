@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSM™ Core | Business Structural Market</title>
+    <title>BSM™ Core | Structural Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap');
         :root { --emerald: #10b981; --rose: #f43f5e; --slate-950: #020617; }
         body { font-family: 'Inter', sans-serif; background: var(--slate-950); color: white; overflow: hidden; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .input-bsm { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 1rem; width: 100%; color: white; transition: 0.3s; }
-        .input-bsm:focus { border-color: var(--emerald); outline: none; }
-        .radar-segment { transition: all 0.4s ease; cursor: pointer; }
-        #dashboard { display: none; opacity: 0; transition: opacity 0.5s; }
-        .active-view { display: flex !important; opacity: 1 !important; }
-        .animate-fade { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .input-bsm { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 1rem; width: 100%; color: white; outline: none; transition: 0.3s; }
+        .input-bsm:focus { border-color: var(--emerald); }
+        #dashboard { display: none; }
+        .active-view { display: flex !important; }
+        .radar-segment { transition: all 0.3s ease; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -26,36 +23,36 @@
     <div id="auth-screen" class="fixed inset-0 z-[999] flex items-center justify-center bg-[radial-gradient(circle_at_top,_#1e2937_0%,_#020617_100%)]">
         <div class="w-full max-w-md p-6">
             <div class="text-center mb-8">
-                <h1 class="text-6xl font-black tracking-tighter text-white">BSM<span class="text-emerald-500">™</span></h1>
-                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em] mt-2">Structural Intelligence</p>
+                <h1 class="text-6xl font-black tracking-tighter">BSM<span class="text-emerald-500">™</span></h1>
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em] mt-2">Market Engineering</p>
             </div>
 
             <div class="glass p-8 rounded-[2.5rem] shadow-2xl">
                 <div class="flex gap-2 mb-8 bg-black/40 p-1.5 rounded-2xl">
-                    <button onclick="setAuthMode('login')" id="btn-mode-login" class="flex-1 py-2 text-[10px] font-black rounded-xl bg-white text-black transition-all">ENTRAR</button>
-                    <button onclick="setAuthMode('signup')" id="btn-mode-signup" class="flex-1 py-2 text-[10px] font-black rounded-xl text-slate-400 transition-all">REGISTRAR</button>
+                    <button type="button" onclick="toggleAuth('login')" id="tab-login" class="flex-1 py-2 text-[10px] font-black rounded-xl bg-white text-black">LOGIN</button>
+                    <button type="button" onclick="toggleAuth('signup')" id="tab-signup" class="flex-1 py-2 text-[10px] font-black rounded-xl text-slate-400">REGISTRAR</button>
                 </div>
 
-                <form id="main-auth-form" class="space-y-4">
-                    <input type="email" id="email" required class="input-bsm" placeholder="E-mail">
+                <form id="auth-form" class="space-y-4">
+                    <input type="email" id="email" required class="input-bsm" placeholder="E-mail Corporativo">
                     <input type="password" id="password" required class="input-bsm" placeholder="Senha">
                     
-                    <div id="signup-fields" class="hidden space-y-4 animate-fade">
-                        <select id="role-select" class="input-bsm appearance-none">
-                            <option value="S">Sales (Nível S1)</option>
-                            <option value="M">Manager (Nível M2)</option>
-                            <option value="B">Business (Nível B3)</option>
+                    <div id="signup-fields" class="hidden space-y-4">
+                        <select id="role-select" class="input-bsm">
+                            <option value="S">Sales (S1)</option>
+                            <option value="M">Manager (M2)</option>
+                            <option value="B">Business (B3)</option>
                         </select>
-                        <p class="text-[9px] text-slate-500 px-2 uppercase font-bold tracking-tighter">A senha deve terminar com o código do nível (ex: 1234S1)</p>
+                        <p class="text-[9px] text-slate-500 text-center uppercase font-bold">A senha deve terminar em S1, M2 ou B3</p>
                     </div>
 
-                    <div id="auth-msg" class="hidden text-[10px] font-black text-center p-3 rounded-xl uppercase tracking-tighter"></div>
+                    <div id="auth-feedback" class="hidden text-[10px] font-black text-center p-3 rounded-xl uppercase border"></div>
 
-                    <button type="submit" id="btn-exec" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-95">
+                    <button type="submit" id="btn-submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg">
                         ACESSAR TERMINAL
                     </button>
 
-                    <button type="button" onclick="recoverPassword()" class="w-full text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-4 hover:text-white transition-colors">
+                    <button type="button" onclick="handleReset()" class="w-full text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-4">
                         Esqueceu a senha? Recuperar Chave
                     </button>
                 </form>
@@ -63,321 +60,222 @@
         </div>
     </div>
 
-    <div id="dashboard" class="h-screen flex flex-col">
+    <div id="dashboard" class="h-screen flex-col">
         <nav class="h-20 border-b border-white/5 px-10 flex items-center justify-between glass">
             <div class="flex items-center gap-6">
                 <span class="text-2xl font-black tracking-tighter">BSM™</span>
-                <div class="flex items-center gap-2">
-                    <span id="role-badge" class="px-3 py-1 bg-emerald-500 text-black text-[10px] font-black rounded-md">--</span>
-                    <span id="user-display" class="text-[11px] mono text-slate-400">---</span>
-                </div>
+                <span id="badge-nivel" class="px-3 py-1 bg-emerald-500 text-black text-[10px] font-black rounded-md">--</span>
             </div>
-            
-            <div class="flex items-center gap-4">
-                <div id="business-tools" class="hidden flex gap-4 mr-6 border-r border-white/10 pr-6">
-                    <button class="text-[10px] font-black text-slate-400 hover:text-white transition-colors">MASTER P&L</button>
-                    <button class="text-[10px] font-black text-slate-400 hover:text-white transition-colors">EQUIPES</button>
-                </div>
-                <button onclick="logout()" class="text-slate-500 hover:text-rose-500 transition-colors p-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-            </div>
+            <button onclick="handleLogout()" class="text-slate-500 hover:text-rose-500 font-black text-[10px] uppercase">Sair do Sistema</button>
         </nav>
-
+        
         <main class="flex-1 flex overflow-hidden">
             <aside class="w-80 border-r border-white/5 p-6 flex flex-col bg-black/20">
-                <div id="manager-tools" class="hidden mb-8 p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl animate-fade">
-                    <h4 class="text-[9px] font-black text-emerald-500 uppercase mb-2 tracking-widest">Gestão de Território (M2)</h4>
-                    <div class="text-xl font-black text-white" id="territory-value">R$ 0,00</div>
-                    <div class="text-[9px] text-slate-500 font-bold mt-1 uppercase">Volume sob Gestão</div>
-                </div>
-
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Contas & Territórios</h3>
-                    <button onclick="newAccount()" class="w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-emerald-500/20 rounded-full text-emerald-500 transition-colors">+</button>
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Territórios</h3>
+                    <button onclick="addTerritory()" class="text-emerald-500 font-bold">+</button>
                 </div>
-                <div id="acc-list" class="space-y-3 overflow-y-auto pr-2 custom-scroll"></div>
+                <div id="acc-list" class="space-y-2 overflow-y-auto"></div>
             </aside>
 
             <section class="flex-1 flex flex-col items-center justify-center p-10 bg-[radial-gradient(circle_at_center,_#111827_0%,_#020617_100%)]">
-                <div class="relative group">
-                    <svg id="radar-svg" width="550" height="550" viewBox="0 0 550 550" class="drop-shadow-2xl transition-transform duration-700"></svg>
+                <div class="relative">
+                    <svg id="radar-svg" width="500" height="500" viewBox="0 0 500 500"></svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <div class="bg-black/60 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center border border-white/5">
-                            <span id="gravit-percent" class="text-6xl font-black text-white leading-none">0%</span>
-                            <span class="text-[9px] font-black text-emerald-500 uppercase mt-2 tracking-[0.2em]">Gravit™ Force</span>
-                        </div>
+                        <span id="gravit-val" class="text-6xl font-black">0%</span>
+                        <span class="text-[10px] text-emerald-500 font-black tracking-widest">GRAVIT™</span>
                     </div>
-                </div>
-                
-                <div class="mt-12 w-full max-w-2xl glass p-8 rounded-[2.5rem] border-emerald-500/20 animate-fade">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span class="text-[10px] font-black uppercase text-emerald-500 tracking-widest">Leitura Estrutural do Território</span>
-                    </div>
-                    <p id="insight-box" class="text-sm italic text-slate-400 leading-relaxed font-medium">
-                        Sistema aguardando seleção de território para decodificação de influências.
-                    </p>
                 </div>
             </section>
 
-            <aside class="w-96 border-l border-white/5 p-8 flex flex-col bg-black/20">
-                <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Plano de Ação (S1)</h3>
-                    <span class="text-[9px] font-black bg-white/5 px-2 py-1 rounded">EXECUÇÃO</span>
-                </div>
-                
-                <div id="action-list" class="flex-1 space-y-4 overflow-y-auto mb-8 pr-2 custom-scroll"></div>
-                
-                <div class="relative group">
-                    <textarea id="action-input" placeholder="Nova diretriz estratégica..." class="w-full bg-white/5 border border-white/10 rounded-3xl p-5 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none shadow-inner" rows="3"></textarea>
-                    <button onclick="addAction()" class="absolute bottom-4 right-4 bg-emerald-600 hover:bg-emerald-500 p-3 rounded-2xl text-white transition-all active:scale-90 shadow-lg shadow-emerald-900/20">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
+            <aside class="w-96 border-l border-white/5 p-8 flex flex-col">
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Ações Táticas</h3>
+                <div id="action-list" class="flex-1 space-y-4 overflow-y-auto mb-6"></div>
+                <div class="relative">
+                    <textarea id="action-in" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white" placeholder="Nova ação..."></textarea>
+                    <button onclick="submitAction()" class="absolute bottom-4 right-4 bg-emerald-600 p-2 rounded-xl">✓</button>
                 </div>
             </aside>
         </main>
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE PADRONIZADA (V4)
+        // 1. AUDITORIA DE CONEXÃO: Instanciação Global
         const SUPABASE_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
-        const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-        let currentRole = null;
-        let authMode = 'login';
-        let accounts = [];
-        let activeAccId = null;
-        let influences = [];
+        let currentAuthMode = 'login';
+        let activeAcc = null;
+        let activeInfluences = [];
 
-        const VECTORS = [
-            {id:'B1', n:'Energia'}, {id:'B2', n:'Tempo'}, {id:'B3', n:'Dinheiro'}, {id:'B4', n:'Eficiência'},
-            {id:'S1', n:'Status'}, {id:'S2', n:'Pertença'}, {id:'S3', n:'Autoridade'}, {id:'S4', n:'Escassez'},
-            {id:'M1', n:'Prova'}, {id:'M2', n:'Comparação'}, {id:'M3', n:'Intuição'}, {id:'M4', n:'Valores'}
-        ];
-
-        // --- MOTOR DE AUTENTICAÇÃO (S1/M2/B3) ---
-        function setAuthMode(mode) {
-            authMode = mode;
-            document.getElementById('btn-mode-login').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode==='login' ? 'bg-white text-black' : 'text-slate-400'}`;
-            document.getElementById('btn-mode-signup').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode==='signup' ? 'bg-white text-black' : 'text-slate-400'}`;
-            document.getElementById('signup-fields').classList.toggle('hidden', mode==='login');
-            document.getElementById('btn-exec').innerText = mode==='login' ? 'ACESSAR TERMINAL' : 'FINALIZAR REGISTRO BSM';
+        // 2. RESOLUÇÃO DE LOGIN E REGISTRO
+        function toggleAuth(mode) {
+            currentAuthMode = mode;
+            document.getElementById('tab-login').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode === 'login' ? 'bg-white text-black' : 'text-slate-400'}`;
+            document.getElementById('tab-signup').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode === 'signup' ? 'bg-white text-black' : 'text-slate-400'}`;
+            document.getElementById('signup-fields').classList.toggle('hidden', mode === 'login');
+            document.getElementById('btn-submit').innerText = mode === 'login' ? 'ACESSAR TERMINAL' : 'FINALIZAR REGISTRO';
         }
 
-        document.getElementById('main-auth-form').onsubmit = async (e) => {
+        document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const btn = document.getElementById('btn-exec');
+            const feedback = document.getElementById('auth-feedback');
             
-            btn.disabled = true;
-            btn.innerText = "PROCESSANDO...";
-
+            // Validação de Sufixo (Regra de Negócio)
             const suffix = password.slice(-2);
-            const roleBySuffix = suffix === 'S1' ? 'S' : suffix === 'M2' ? 'M' : suffix === 'B3' ? 'B' : null;
+            const valid = ['S1', 'M2', 'B3'].includes(suffix);
 
-            if(!roleBySuffix) {
-                showMsg("ERRO: Senha inválida. Use o sufixo do seu nível (S1, M2 ou B3).", "rose");
-                btn.disabled = false;
-                btn.innerText = "TENTAR NOVAMENTE";
+            if(!valid) {
+                showFeedback("Erro: A senha precisa terminar em S1, M2 ou B3.", "rose");
                 return;
             }
 
-            if(authMode === 'signup') {
-                const selectedRole = document.getElementById('role-select').value;
-                if(selectedRole !== roleBySuffix) {
-                    showMsg(`ERRO: O sufixo ${suffix} não corresponde ao nível selecionado.`, "rose");
-                    btn.disabled = false;
+            if(currentAuthMode === 'signup') {
+                const role = document.getElementById('role-select').value;
+                if(role !== suffix.charAt(0)) {
+                    showFeedback("Erro: Sufixo da senha não condiz com o nível.", "rose");
                     return;
                 }
 
-                const { data, error } = await supabase.auth.signUp({
-                    email, password, 
-                    options: { data: { role: selectedRole, suffix: suffix } }
+                const { data, error } = await _supabase.auth.signUp({
+                    email, password, options: { data: { role: role, suffix: suffix } }
                 });
-                if(error) showMsg(error.message, "rose");
-                else showMsg("Registro concluído! Verifique seu e-mail.", "emerald");
+
+                if(error) showFeedback(error.message, "rose");
+                else showFeedback("Sucesso! Verifique seu e-mail para confirmar o acesso.", "emerald");
             } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if(error) showMsg("Credenciais incorretas ou falha de conexão.", "rose");
-                else initApp(data.user, suffix);
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                if(error) showFeedback("Erro: Credenciais inválidas ou e-mail não confirmado.", "rose");
+                else handleEntry(data.user, suffix);
             }
-            btn.disabled = false;
         };
 
-        async function recoverPassword() {
+        // 3. RECUPERAÇÃO DE SENHA (FUNCIONALIDADE INTEGRADA)
+        async function handleReset() {
             const email = document.getElementById('email').value;
-            if(!email) return showMsg("Insira seu e-mail para recuperar.", "rose");
-            const { error } = await supabase.auth.resetPasswordForEmail(email);
-            if(error) showMsg(error.message, "rose");
-            else showMsg("Link de recuperação enviado com sucesso!", "emerald");
+            if(!email) { showFeedback("Digite seu e-mail primeiro.", "rose"); return; }
+            
+            const { error } = await _supabase.auth.resetPasswordForEmail(email);
+            if(error) showFeedback(error.message, "rose");
+            else showFeedback("Link de recuperação enviado para " + email, "emerald");
         }
 
-        function showMsg(t, c) {
-            const m = document.getElementById('auth-msg');
-            m.innerText = t;
-            m.className = `text-[10px] font-black text-center p-4 rounded-xl uppercase tracking-tighter bg-${c}-500/10 text-${c}-500 border border-${c}-500/20 animate-fade`;
-            m.classList.remove('hidden');
+        function showFeedback(txt, color) {
+            const f = document.getElementById('auth-feedback');
+            f.innerText = txt;
+            f.className = `text-[10px] font-black text-center p-3 rounded-xl uppercase border border-${color}-500/30 bg-${color}-500/10 text-${color}-500`;
+            f.classList.remove('hidden');
         }
 
-        function initApp(user, suffix) {
-            currentUser = user;
-            currentRole = suffix.charAt(0);
+        // 4. INICIALIZAÇÃO DO APP
+        async function handleEntry(user, suffix) {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('dashboard').classList.add('active-view');
-            
-            document.getElementById('role-badge').innerText = suffix;
-            document.getElementById('user-display').innerText = user.email;
-
-            // Permissões de Interface
-            if(currentRole === 'M' || currentRole === 'B') document.getElementById('manager-tools').classList.remove('hidden');
-            if(currentRole === 'B') document.getElementById('business-tools').classList.remove('hidden');
-
+            document.getElementById('badge-nivel').innerText = suffix;
             loadAccounts();
-            renderRadar();
+            drawRadar();
         }
 
-        // --- GESTÃO DE DADOS ---
         async function loadAccounts() {
-            const { data } = await supabase.from('accounts').select('*').order('created_at', {ascending:false});
+            const { data } = await _supabase.from('accounts').select('*');
             if(data) {
-                accounts = data;
                 const list = document.getElementById('acc-list');
-                list.innerHTML = accounts.map(a => `
-                    <div onclick="selectAcc('${a.id}')" class="p-5 glass rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-all group ${activeAccId === a.id ? 'border-emerald-500 bg-emerald-500/10' : ''}">
-                        <div class="flex justify-between items-start">
-                            <div class="text-[11px] font-black text-white uppercase group-hover:text-emerald-400 transition-colors">${a.name}</div>
-                            <div class="text-[8px] font-black bg-white/5 px-2 py-0.5 rounded text-slate-500">${a.status}</div>
-                        </div>
-                        <div class="text-[10px] mono text-slate-500 mt-2 tracking-tighter">EST: R$ ${Number(a.valor).toLocaleString()}</div>
+                list.innerHTML = data.map(a => `
+                    <div onclick="selectAcc('${a.id}')" class="p-4 glass rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
+                        <div class="text-[11px] font-black">${a.name}</div>
+                        <div class="text-[9px] text-slate-500">R$ ${a.valor}</div>
                     </div>
                 `).join('');
             }
         }
 
         async function selectAcc(id) {
-            activeAccId = id;
-            const acc = accounts.find(a => a.id === id);
-            document.getElementById('territory-value').innerText = `R$ ${Number(acc.valor).toLocaleString()}`;
-            await loadInfluences();
-            await loadActions();
-            processBSM();
-            loadAccounts();
-        }
-
-        // --- RADAR ENGINE ---
-        function renderRadar() {
-            const svg = document.getElementById('radar-svg');
-            const center = 275, r = 240, inner = 110;
-
-            VECTORS.forEach((v, i) => {
-                const start = (i * 30 - 90) * (Math.PI / 180);
-                const end = ((i + 1) * 30 - 90) * (Math.PI / 180);
-                const d = `
-                    M ${center + r * Math.cos(start)} ${center + r * Math.sin(start)}
-                    A ${r} ${r} 0 0 1 ${center + r * Math.cos(end)} ${center + r * Math.sin(end)}
-                    L ${center + inner * Math.cos(end)} ${center + inner * Math.sin(end)}
-                    A ${inner} ${inner} 0 0 0 ${center + inner * Math.cos(start)} ${center + inner * Math.sin(start)} Z
-                `;
-
-                const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                p.setAttribute("d", d);
-                p.setAttribute("id", `vec-${v.id}`);
-                p.setAttribute("class", "radar-segment fill-white/5 stroke-white/10");
-                p.onclick = () => toggleVector(v.id);
-                svg.appendChild(p);
-
-                const ang = (i * 30 - 75) * (Math.PI / 180);
-                const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                t.setAttribute("x", center + (r + 25) * Math.cos(ang));
-                t.setAttribute("y", center + (r + 25) * Math.sin(ang));
-                t.setAttribute("text-anchor", "middle");
-                t.setAttribute("class", "fill-slate-600 text-[10px] font-black mono tracking-tighter");
-                t.textContent = v.id;
-                svg.appendChild(t);
-            });
-        }
-
-        async function toggleVector(code) {
-            if(!activeAccId) return;
-            const current = influences.find(inf => inf.influence_code === code);
-            let next = 'neutro';
-            if(!current || current.state === 'neutro') next = 'ativo';
-            else if(current.state === 'ativo') next = 'removido';
-
-            await supabase.from('influences').upsert({
-                account_id: activeAccId, user_id: currentUser.id, influence_code: code, state: next
-            }, { onConflict: 'account_id,influence_code' });
-
-            await loadInfluences();
-            processBSM();
-        }
-
-        function processBSM() {
-            const ativos = influences.filter(i => i.state === 'ativo').length;
-            const g = Math.round(((12 - ativos) / 12) * 100);
-            
-            document.getElementById('gravit-percent').innerText = g + '%';
-            
-            const box = document.getElementById('insight-box');
-            if(ativos > 8) box.innerText = "ESTRUTURA TRAVADA: O território apresenta inércia estrutural crítica. A conversão é improvável sem reduzir os bloqueios B1 e B3 imediatamente.";
-            else if(g > 70) box.innerText = "HORIZONTE DE EVENTOS: Força gravitacional otimizada. Foque na validação de M1 (Prova) para colapsar a decisão do cliente.";
-            else box.innerText = "ANÁLISE ATIVA: Remova as barreiras sociais (S1-S4) para acelerar a tração do território.";
-
-            VECTORS.forEach(v => {
-                const el = document.getElementById(`vec-${v.id}`);
-                if(!el) return;
-                const state = influences.find(i => i.influence_code === v.id)?.state || 'neutro';
-                el.style.fill = state === 'ativo' ? 'rgba(244,63,94,0.4)' : state === 'removido' ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.05)';
-                el.style.stroke = state === 'ativo' ? '#f43f5e' : state === 'removido' ? '#10b981' : 'rgba(255,255,255,0.1)';
-            });
-        }
-
-        // --- AUXILIARES & AÇÕES ---
-        async function loadInfluences() {
-            const { data } = await supabase.from('influences').select('*').eq('account_id', activeAccId);
-            influences = data || [];
-        }
-
-        async function loadActions() {
-            const { data } = await supabase.from('actions').select('*').eq('account_id', activeAccId).order('created_at', {ascending:false});
-            if(data) {
-                document.getElementById('action-list').innerHTML = data.map(a => `
-                    <div class="p-5 glass rounded-3xl border-l-4 border-emerald-500 animate-fade">
-                        <div class="text-[8px] font-black text-slate-500 mb-1 uppercase tracking-widest">${new Date(a.created_at).toLocaleDateString()}</div>
-                        <p class="text-[11px] text-slate-200 font-medium leading-relaxed">${a.description}</p>
-                    </div>
-                `).join('');
-            }
-        }
-
-        async function addAction() {
-            const input = document.getElementById('action-input');
-            if(!input.value || !activeAccId) return;
-            await supabase.from('actions').insert({ account_id: activeAccId, user_id: currentUser.id, description: input.value });
-            input.value = '';
+            activeAcc = id;
+            const { data } = await _supabase.from('influences').select('*').eq('account_id', id);
+            activeInfluences = data || [];
+            updateRadarVisuals();
             loadActions();
         }
 
-        async function logout() { await supabase.auth.signOut(); window.location.reload(); }
+        // 5. ENGINE DO RADAR (SVG DINÂMICO)
+        function drawRadar() {
+            const svg = document.getElementById('radar-svg');
+            const center = 250, r = 200, inner = 80;
+            const codes = ['B1','B2','B3','B4','S1','S2','S3','S4','M1','M2','M3','M4'];
 
-        function newAccount() {
-            const name = prompt("Nome da Conta/Território:");
-            const valor = prompt("Valor Estratégico (Numérico):");
-            if(name && valor) {
-                supabase.from('accounts').insert({ name, valor, user_id: currentUser.id }).then(() => loadAccounts());
+            codes.forEach((code, i) => {
+                const start = (i * 30 - 90) * (Math.PI / 180);
+                const end = ((i + 1) * 30 - 90) * (Math.PI / 180);
+                const d = `M ${center + r * Math.cos(start)} ${center + r * Math.sin(start)} A ${r} ${r} 0 0 1 ${center + r * Math.cos(end)} ${center + r * Math.sin(end)} L ${center + inner * Math.cos(end)} ${center + inner * Math.sin(end)} A ${inner} ${inner} 0 0 0 ${center + inner * Math.cos(start)} ${center + inner * Math.sin(start)} Z`;
+                
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("d", d);
+                path.setAttribute("id", "path-" + code);
+                path.setAttribute("class", "radar-segment fill-white/5 stroke-white/10");
+                path.onclick = () => toggleInfluence(code);
+                svg.appendChild(path);
+            });
+        }
+
+        async function toggleInfluence(code) {
+            if(!activeAcc) return;
+            const exist = activeInfluences.find(i => i.influence_code === code);
+            let state = 'neutro';
+            if(!exist || exist.state === 'neutro') state = 'ativo';
+            else if(exist.state === 'ativo') state = 'removido';
+
+            await _supabase.from('influences').upsert({
+                account_id: activeAcc, influence_code: code, state: state, user_id: (await _supabase.auth.getUser()).data.user.id
+            }, { onConflict: 'account_id,influence_code' });
+
+            selectAcc(activeAcc);
+        }
+
+        function updateRadarVisuals() {
+            const codes = ['B1','B2','B3','B4','S1','S2','S3','S4','M1','M2','M3','M4'];
+            let ativos = 0;
+            codes.forEach(c => {
+                const el = document.getElementById("path-" + c);
+                const inf = activeInfluences.find(i => i.influence_code === c);
+                if(inf?.state === 'ativo') { el.style.fill = 'rgba(244,63,94,0.4)'; ativos++; }
+                else if(inf?.state === 'removido') el.style.fill = 'rgba(16,185,129,0.4)';
+                else el.style.fill = 'rgba(255,255,255,0.05)';
+            });
+            document.getElementById('gravit-val').innerText = Math.round(((12-ativos)/12)*100) + "%";
+        }
+
+        async function addTerritory() {
+            const n = prompt("Nome do território:");
+            const v = prompt("Valor:");
+            if(n) {
+                const user = (await _supabase.auth.getUser()).data.user;
+                await _supabase.from('accounts').insert({ name: n, valor: v, user_id: user.id });
+                loadAccounts();
             }
         }
 
+        async function loadActions() {
+            const { data } = await _supabase.from('actions').select('*').eq('account_id', activeAcc);
+            document.getElementById('action-list').innerHTML = (data || []).map(a => `<div class="p-3 glass rounded-xl text-[10px]">${a.description}</div>`).join('');
+        }
+
+        async function submitAction() {
+            const val = document.getElementById('action-in').value;
+            if(!val || !activeAcc) return;
+            await _supabase.from('actions').insert({ account_id: activeAcc, description: val, user_id: (await _supabase.auth.getUser()).data.user.id });
+            document.getElementById('action-in').value = '';
+            loadActions();
+        }
+
+        async function handleLogout() { await _supabase.auth.signOut(); window.location.reload(); }
+
+        // AUTO-LOGIN (PERSISTÊNCIA)
         window.onload = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if(session) {
-                const suffix = session.user.user_metadata.suffix || 'S1';
-                initApp(session.user, suffix);
-            }
+            const { data: { session } } = await _supabase.auth.getSession();
+            if(session) handleEntry(session.user, session.user.user_metadata.suffix || 'S1');
         };
     </script>
 </body>
