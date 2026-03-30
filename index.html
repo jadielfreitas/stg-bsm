@@ -1,723 +1,242 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSM™ | Business Structural Market System</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
-        :root {
-            --bsm-bg: #0f172a;
-            --bsm-card: #1e2937;
-            --bsm-border: #334155;
-            --bsm-accent: #10b981;
-            --bsm-danger: #f43f5e;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>STG-BSM</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bsm: '#0f172a'
+          }
         }
+      }
+    }
+  </script>
 
-        body {
-            font-family: 'Inter', -apple-system, system-ui, sans-serif;
-            background-color: var(--bsm-bg);
-            color: #f8fafc;
-            overflow-x: hidden;
-        }
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        /* Glassmorphism & Effects */
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .radar-segment {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            stroke-width: 1.5;
-        }
-
-        .radar-segment:hover {
-            filter: brightness(1.2);
-            stroke-width: 3;
-        }
-
-        .gravit-ring {
-            transition: stroke-dashoffset 0.8s ease-in-out;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-
-        .loading-skeleton {
-            background: linear-gradient(90deg, #1e2937 25%, #334155 50%, #1e2937 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-        }
-
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        #login-screen {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        #dashboard {
-            display: none;
-        }
-    </style>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #020617;
+    }
+  </style>
 </head>
-<body class="antialiased">
 
-    <div id="login-screen" class="bg-slate-950 px-4">
-        <div class="w-full max-w-md animate-fade-in">
-            <div class="text-center mb-10">
-                <h1 class="text-5xl font-extrabold tracking-tighter text-white mb-2">BSM<span class="text-emerald-500">™</span></h1>
-                <p class="text-slate-400 font-medium">Business Structural Market System</p>
-            </div>
-            
-            <div class="glass-panel p-8 rounded-2xl shadow-2xl border border-slate-800">
-                <form id="login-form" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-300 mb-2">E-mail corporativo</label>
-                        <input type="email" id="login-email" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" placeholder="nome@empresa.com">
-                    </div>
-                    <div>
-                        <div class="flex justify-between mb-2">
-                            <label class="block text-sm font-semibold text-slate-300">Senha</label>
-                            <button type="button" onclick="handleResetPassword()" class="text-xs text-emerald-500 hover:underline">Esqueci a senha</button>
-                        </div>
-                        <input type="password" id="login-password" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" placeholder="••••••••">
-                    </div>
-                    <div id="login-error" class="hidden bg-rose-500/10 border border-rose-500/50 text-rose-500 text-sm p-3 rounded-lg">
-                        E-mail ou senha inválidos. Tente novamente.
-                    </div>
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-emerald-900/20">
-                        Acessar Sistema
-                    </button>
-                </form>
-            </div>
-        </div>
+<body class="text-white">
+
+<!-- LOGIN -->
+<div id="loginScreen" class="flex items-center justify-center h-screen">
+  <div class="bg-slate-900 p-8 rounded-xl w-full max-w-md border border-slate-700">
+    <h1 class="text-2xl font-bold mb-6 text-center">BSM™ Login</h1>
+
+    <input id="email" type="email" placeholder="E-mail"
+      class="w-full mb-4 p-3 rounded bg-slate-800 border border-slate-600"/>
+
+    <input id="password" type="password" placeholder="Senha"
+      class="w-full mb-4 p-3 rounded bg-slate-800 border border-slate-600"/>
+
+    <button onclick="login()"
+      class="w-full bg-emerald-600 hover:bg-emerald-700 p-3 rounded">
+      Entrar
+    </button>
+
+    <p id="loginError" class="text-red-500 mt-4 text-center hidden">
+      E-mail ou senha inválidos. Tente novamente.
+    </p>
+
+    <button onclick="resetPassword()" class="mt-4 text-sm text-gray-400 w-full">
+      Esqueci a senha
+    </button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 h-16 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6">
+    
+    <div>
+      <div class="text-xl font-bold tracking-tight">BSM™</div>
+      <div class="text-xs text-gray-400">
+        Business Structural Market System – Territory · Influence · Execution
+      </div>
     </div>
 
-    <div id="dashboard" class="min-h-screen flex flex-col">
-        <header class="sticky top-0 z-50 h-16 bg-[#0f172a]/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-6">
-            <div class="flex items-center gap-4">
-                <div class="text-2xl font-black tracking-tighter text-white">BSM<span class="text-emerald-500">™</span></div>
-                <div class="hidden md:block h-6 w-px bg-slate-700"></div>
-                <div class="hidden md:block text-xs font-medium text-slate-400 tracking-wider uppercase">Territory · Influence · Execution</div>
-            </div>
+    <div class="flex items-center gap-4">
+      <div id="globalGravit" class="text-sm text-emerald-400 font-bold">
+        GRAVIT: --
+      </div>
 
-            <div class="flex items-center gap-8">
-                <div class="flex items-center gap-3">
-                    <div class="relative w-10 h-10">
-                        <svg class="w-full h-full" viewBox="0 0 36 36">
-                            <path class="stroke-slate-800" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="global-gravit-path" class="gravit-ring stroke-emerald-500" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white" id="global-gravit-text">0%</div>
-                    </div>
-                    <div class="text-xs">
-                        <div class="text-slate-500 font-bold leading-none">GRAVIT-Meter™</div>
-                        <div id="status-label" class="text-emerald-500 font-black uppercase text-[10px] tracking-widest">Inativo</div>
-                    </div>
-                </div>
+      <button class="bg-emerald-600 px-5 py-2 rounded-full hover:bg-emerald-700">
+        + Nova Conta
+      </button>
 
-                <div class="flex items-center gap-3">
-                    <button onclick="showNewAccountModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all shadow-lg shadow-emerald-900/30">
-                        + Nova Conta
-                    </button>
-                    <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-white transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    </button>
-                </div>
-            </div>
-        </header>
+      <button onclick="logout()" class="text-gray-400">
+        Logout
+      </button>
+    </div>
+  </header>
 
-        <main class="flex-1 max-w-[1600px] w-full mx-auto p-6 grid grid-cols-12 gap-6">
-            
-            <section class="col-span-12 lg:col-span-4 xl:col-span-3 space-y-4">
-                <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-xl font-bold text-white">Territórios Ativos</h2>
-                    <span id="account-count" class="bg-slate-800 text-slate-400 text-xs px-2 py-1 rounded">0</span>
-                </div>
-                <div id="accounts-list" class="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
-                    </div>
-            </section>
+  <!-- MAIN -->
+  <main class="flex gap-6 p-6 max-w-screen-2xl mx-auto">
 
-            <section class="col-span-12 lg:col-span-8 xl:col-span-6 flex flex-col items-center">
-                <div id="radar-container" class="relative glass-panel rounded-3xl p-8 w-full flex flex-col items-center justify-center border-slate-800 min-h-[600px]">
-                    <div id="radar-empty-state" class="text-center space-y-4">
-                        <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mx-auto opacity-50">
-                            <svg class="w-10 h-10 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A2 2 0 013 15.485V6.414m9.927 8.242l.271.135a2 2 0 01.896.896l.135.271m-9.043-9.043L3.586 4.586a2 2 0 012.828 0L9 7.172m0 0L20.414 7.172a2 2 0 011.414.586L22 8.172m-11 11V11.172" /></svg>
-                        </div>
-                        <h3 class="text-slate-400 font-medium">Selecione um território para visualizar o Radar BSM™</h3>
-                    </div>
-
-                    <div id="radar-content" class="hidden w-full flex flex-col items-center">
-                        <h3 id="current-account-name" class="text-2xl font-bold text-white mb-8 tracking-tight">--</h3>
-                        
-                        <div class="relative">
-                            <svg id="bsm-radar" width="420" height="420" viewBox="0 0 420 420" class="drop-shadow-2xl">
-                                <circle cx="210" cy="210" r="60" fill="#0f172a" stroke="#334155" stroke-width="2" />
-                                <g id="radar-center-text" class="pointer-events-none">
-                                    <text x="210" y="205" text-anchor="middle" id="radar-prob" class="fill-white font-black text-2xl">0%</text>
-                                    <text x="210" y="222" text-anchor="middle" class="fill-slate-500 font-bold text-[10px] uppercase">Probabilidade</text>
-                                </g>
-                            </svg>
-                        </div>
-
-                        <div id="insight-box" class="mt-8 w-full bg-gradient-to-r from-slate-900 to-slate-950 border border-slate-700 p-6 rounded-2xl shadow-inner">
-                            <div class="flex items-center gap-3 mb-3">
-                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span class="text-xs font-black uppercase tracking-widest text-emerald-500">Insights IA-BSM™</span>
-                            </div>
-                            <p id="insight-text" class="text-slate-300 text-sm leading-relaxed font-medium italic">
-                                Analisando estrutura territorial...
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="col-span-12 lg:col-span-12 xl:col-span-3 space-y-6">
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="glass-panel p-4 rounded-xl border-slate-800">
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">IDT™</div>
-                        <div id="metric-idt" class="text-xl font-black text-white">--</div>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl border-slate-800">
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">TES™</div>
-                        <div id="metric-tes" class="text-xl font-black text-white">--</div>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl border-slate-800">
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">EET™</div>
-                        <div id="metric-eet" class="text-xl font-black text-white">--</div>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl border-slate-800">
-                        <div class="text-[10px] font-bold text-slate-500 uppercase">Gravit™</div>
-                        <div id="metric-gravit" class="text-xl font-black text-white">--</div>
-                    </div>
-                </div>
-
-                <div class="flex-1 flex flex-col min-h-0">
-                    <h3 class="font-bold text-white mb-4">Plano de Execução</h3>
-                    <div id="actions-list" class="space-y-3 overflow-y-auto max-h-[300px] mb-4 pr-1">
-                        </div>
-                    <div class="mt-auto">
-                        <input type="text" id="new-action-input" placeholder="Nova ação tática..." class="w-full bg-slate-900 border border-slate-800 rounded-t-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <button onclick="handleAddAction()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-b-xl text-xs transition-colors border-t border-slate-700">
-                            REGISTRAR AÇÃO
-                        </button>
-                    </div>
-                </div>
-            </section>
-        </main>
+    <!-- COLUNA 1 -->
+    <div class="w-[35%]">
+      <h2 class="font-bold mb-4">Territórios Ativos</h2>
+      <div id="accountsList"></div>
     </div>
 
-    <div id="modal-overlay" class="hidden fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-lg rounded-3xl p-8 border-slate-800 shadow-2xl scale-95 transition-transform" id="modal-container">
-            <h2 id="modal-title" class="text-2xl font-bold text-white mb-6">Nova Conta</h2>
-            <div id="modal-content" class="space-y-4">
-                </div>
-            <div class="flex justify-end gap-3 mt-8">
-                <button onclick="closeModal()" class="px-6 py-2 text-slate-400 font-bold text-sm">Cancelar</button>
-                <button id="modal-save-btn" class="bg-emerald-600 px-8 py-2 rounded-full text-white font-bold text-sm">Salvar</button>
-            </div>
-        </div>
+    <!-- COLUNA 2 -->
+    <div class="w-[40%] flex justify-center items-center">
+      <div class="text-gray-500">
+        Radar BSM será carregado aqui
+      </div>
     </div>
 
-    <div id="toast" class="fixed bottom-6 right-6 translate-y-20 opacity-0 transition-all duration-500 z-[200] flex items-center gap-3 bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-2xl shadow-emerald-900/40">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-        <span id="toast-message" class="font-bold text-sm tracking-tight">Alterações salvas</span>
+    <!-- COLUNA 3 -->
+    <div class="w-[25%]">
+      <h2 class="font-bold mb-4">Métricas</h2>
+      <div id="metrics"></div>
     </div>
 
-    <script>
-        // CONFIGURAÇÃO OBRIGATÓRIA
-        const SUPABASE_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  </main>
 
-        // ESTADO GLOBAL
-        let currentUser = null;
-        let accounts = [];
-        let currentAccountId = null;
-        let influences = [];
-        let actions = [];
+</div>
 
-        // MAPEAMENTO DOS VETORES BSM™
-        const VECTORS = [
-            { id: 'B1', name: 'Energia', desc: 'Custo percebido de implementação', color: '#ef4444' },
-            { id: 'B2', name: 'Tempo', desc: 'Janela viável percebida', color: '#f59e0b' },
-            { id: 'B3', name: 'Dinheiro', desc: 'ROI não demonstrado', color: '#eab308' },
-            { id: 'B4', name: 'Eficiência', desc: 'Territorial Blindness™', color: '#84cc16' },
-            { id: 'S1', name: 'Pertencimento', desc: 'Medo de isolamento tribal', color: '#22c55e' },
-            { id: 'S2', name: 'Status', desc: 'Exposição política', color: '#10b981' },
-            { id: 'S3', name: 'Autoridade', desc: 'Ausência de validação', color: '#06b67f' },
-            { id: 'S4', name: 'Escassez', desc: 'Urgência territorial', color: '#0ea5e9' },
-            { id: 'M1', name: 'Prova', desc: 'Ceticismo por dados', color: '#3b82f6' },
-            { id: 'M2', name: 'Comparação', desc: 'Dúvida comparativa', color: '#6366f1' },
-            { id: 'M3', name: 'Intuição', desc: 'Desalinhamento decisório', color: '#8b5cf6' },
-            { id: 'M4', name: 'Valores', desc: 'Conflito de princípios', color: '#a855f7' }
-        ];
+<!-- TOAST -->
+<div id="toast"
+  class="fixed bottom-6 right-6 bg-emerald-600 px-4 py-2 rounded opacity-0 transition">
+  Salvo automaticamente
+</div>
 
-        // INICIALIZAÇÃO
-        window.onload = async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                setupUser(session.user);
-            } else {
-                showLogin();
-            }
+<script>
+/* =========================
+   CONFIG SUPABASE
+========================= */
+const SUPABASE_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
 
-            // Real-time listeners
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN') setupUser(session.user);
-                if (event === 'SIGNED_OUT') showLogin();
-            });
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // Initialize Radar SVG
-            renderRadarStructure();
-            
-            // Auto-save cycle (8s)
-            setInterval(autoSave, 8000);
-        };
+/* =========================
+   AUTH
+========================= */
+async function checkSession() {
+  const { data } = await supabaseClient.auth.getSession();
 
-        // --- AUTH FLOW ---
-        const showLogin = () => {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('dashboard').style.display = 'none';
-        };
+  if (data.session && data.session.user) {
+    showDashboard();
+  } else {
+    showLogin();
+  }
+}
 
-        const setupUser = (user) => {
-            currentUser = user;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'block';
-            loadAccounts();
-        };
+function showLogin() {
+  document.getElementById("loginScreen").classList.remove("hidden");
+  document.getElementById("dashboard").classList.add("hidden");
+}
 
-        document.getElementById('login-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const errorDiv = document.getElementById('login-error');
+function showDashboard() {
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            
-            if (error) {
-                errorDiv.classList.remove('hidden');
-                setTimeout(() => errorDiv.classList.add('hidden'), 4000);
-            }
-        };
+  loadAccounts();
+}
 
-        const handleLogout = async () => {
-            await supabaseClient.auth.signOut();
-            window.location.reload();
-        };
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-        const handleResetPassword = async () => {
-            const email = document.getElementById('login-email').value;
-            if(!email) return alert("Digite seu e-mail primeiro");
-            await supabaseClient.auth.resetPasswordForEmail(email);
-            showToast("Link enviado para o e-mail");
-        };
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
-        // --- DATA LOADERS ---
-        async function loadAccounts() {
-            renderSkeletons('accounts-list', 3);
-            const { data, error } = await supabaseClient
-                .from('accounts')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: false });
+  if (error) {
+    const el = document.getElementById("loginError");
+    el.classList.remove("hidden");
+    setTimeout(() => el.classList.add("hidden"), 4000);
+  }
+}
 
-            if (data) {
-                accounts = data;
-                renderAccounts();
-            }
-        }
+async function logout() {
+  await supabaseClient.auth.signOut();
+  showLogin();
+}
 
-        async function selectAccount(id) {
-            currentAccountId = id;
-            const account = accounts.find(a => a.id === id);
-            document.getElementById('radar-empty-state').classList.add('hidden');
-            document.getElementById('radar-content').classList.remove('hidden');
-            document.getElementById('current-account-name').innerText = account.name;
-            
-            // Highlight active card
-            document.querySelectorAll('.account-card').forEach(c => {
-                c.classList.remove('border-emerald-500', 'bg-slate-800');
-                if(c.dataset.id == id) c.classList.add('border-emerald-500', 'bg-slate-800');
-            });
+async function resetPassword() {
+  const email = document.getElementById("email").value;
 
-            await Promise.all([
-                loadInfluences(id),
-                loadMetrics(id),
-                loadActions(id)
-            ]);
-            
-            calculateBSM();
-        }
+  if (!email) return;
 
-        async function loadInfluences(accountId) {
-            const { data } = await supabaseClient
-                .from('influences')
-                .select('*')
-                .eq('account_id', accountId);
-            
-            influences = data || [];
-            updateRadarVisuals();
-        }
+  await supabaseClient.auth.resetPasswordForEmail(email);
 
-        async function loadMetrics(accountId) {
-            const { data } = await supabaseClient
-                .from('bsm_metrics')
-                .select('*')
-                .eq('account_id', accountId)
-                .maybeSingle();
-            
-            if(data) {
-                document.getElementById('metric-idt').innerText = data.idt + '%';
-                document.getElementById('metric-tes').innerText = data.tes + '%';
-                document.getElementById('metric-eet').innerText = data.eet + '%';
-                document.getElementById('metric-gravit').innerText = Math.round(data.gravit * 100) + '%';
-            }
-        }
+  showToast("Link enviado para o e-mail");
+}
 
-        async function loadActions(accountId) {
-            const { data } = await supabaseClient
-                .from('actions')
-                .select('*')
-                .eq('account_id', accountId)
-                .order('created_at', { ascending: false });
-            
-            actions = data || [];
-            renderActions();
-        }
+/* =========================
+   ACCOUNTS (BASE)
+========================= */
+async function loadAccounts() {
+  const { data } = await supabaseClient
+    .from('accounts')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-        // --- RENDERING ---
-        function renderAccounts() {
-            const list = document.getElementById('accounts-list');
-            document.getElementById('account-count').innerText = accounts.length;
-            
-            if(accounts.length === 0) {
-                list.innerHTML = `<div class="p-8 text-center text-slate-500 text-sm">Nenhum território cadastrado.</div>`;
-                return;
-            }
+  const container = document.getElementById("accountsList");
+  container.innerHTML = "";
 
-            list.innerHTML = accounts.map(acc => `
-                <div onclick="selectAccount('${acc.id}')" data-id="${acc.id}" class="account-card glass-panel p-4 rounded-xl border border-slate-700 hover:border-slate-500 cursor-pointer transition-all animate-fade-in group">
-                    <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-bold text-white group-hover:text-emerald-400 transition-colors">${acc.name}</h4>
-                        <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-bold uppercase">${acc.status || 'Lead'}</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="text-slate-400">R$ ${Number(acc.valor || 0).toLocaleString('pt-BR')}</span>
-                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="event.stopPropagation(); deleteAccount('${acc.id}')" class="text-rose-500 hover:text-rose-400">Excluir</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+  if (!data || data.length === 0) {
+    container.innerHTML = "<p class='text-gray-500'>Nenhuma conta encontrada</p>";
+    return;
+  }
 
-        function renderRadarStructure() {
-            const svg = document.getElementById('bsm-radar');
-            const radius = 180;
-            const innerRadius = 60;
-            const center = 210;
+  data.forEach(acc => {
+    const div = document.createElement("div");
+    div.className = "bg-slate-800 p-4 rounded mb-3 border border-slate-700 hover:scale-[1.02] transition";
 
-            VECTORS.forEach((v, i) => {
-                const startAngle = (i * 30 - 90) * (Math.PI / 180);
-                const endAngle = ((i + 1) * 30 - 90) * (Math.PI / 180);
-                
-                const x1 = center + radius * Math.cos(startAngle);
-                const y1 = center + radius * Math.sin(startAngle);
-                const x2 = center + radius * Math.cos(endAngle);
-                const y2 = center + radius * Math.sin(endAngle);
-                
-                const x3 = center + innerRadius * Math.cos(endAngle);
-                const y3 = center + innerRadius * Math.sin(endAngle);
-                const x4 = center + innerRadius * Math.cos(startAngle);
-                const y4 = center + innerRadius * Math.sin(startAngle);
+    div.innerHTML = `
+      <div class="font-bold">${acc.name}</div>
+      <div class="text-sm text-gray-400">R$ ${acc.valor || 0}</div>
+    `;
 
-                const d = `M ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${innerRadius} ${innerRadius} 0 0 0 ${x4} ${y4} Z`;
-                
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                path.setAttribute("d", d);
-                path.setAttribute("id", `vector-${v.id}`);
-                path.setAttribute("class", "radar-segment fill-[#1e2937] stroke-[#334155]");
-                path.setAttribute("data-code", v.id);
-                path.onclick = () => cycleVectorState(v.id);
-                
-                // Tooltip logic
-                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-                title.textContent = `${v.id} - ${v.name}: ${v.desc}`;
-                path.appendChild(title);
+    container.appendChild(div);
+  });
+}
 
-                svg.insertBefore(path, document.getElementById('radar-center-text'));
-                
-                // Labels
-                const labelAngle = (i * 30 - 75) * (Math.PI / 180);
-                const lx = center + (radius + 25) * Math.cos(labelAngle);
-                const ly = center + (radius + 25) * Math.sin(labelAngle);
-                
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", lx);
-                text.setAttribute("y", ly);
-                text.setAttribute("text-anchor", "middle");
-                text.setAttribute("class", "fill-slate-500 text-[10px] font-bold");
-                text.textContent = v.id;
-                svg.appendChild(text);
-            });
-        }
+/* =========================
+   TOAST
+========================= */
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.innerText = msg;
+  t.classList.remove("opacity-0");
 
-        function renderActions() {
-            const list = document.getElementById('actions-list');
-            list.innerHTML = actions.map(act => `
-                <div class="p-3 bg-slate-900/50 border border-slate-800 rounded-lg text-xs animate-fade-in">
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="text-slate-300">${act.description}</span>
-                        <span class="text-[9px] text-slate-600">${new Date(act.created_at).toLocaleDateString()}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
+  setTimeout(() => {
+    t.classList.add("opacity-0");
+  }, 2000);
+}
 
-        // --- LOGIC ---
-        async function cycleVectorState(code) {
-            if(!currentAccountId) return;
-            
-            const existing = influences.find(inf => inf.influence_code === code);
-            let newState = 'neutro';
+/* =========================
+   INIT
+========================= */
+window.onload = () => {
+  checkSession();
 
-            if (!existing || existing.state === 'neutro') newState = 'ativo';
-            else if (existing.state === 'ativo') newState = 'removido';
-            else newState = 'neutro';
+  supabaseClient.auth.onAuthStateChange(() => {
+    checkSession();
+  });
+};
+</script>
 
-            // Optimistic update
-            if(existing) existing.state = newState;
-            else influences.push({ account_id: currentAccountId, influence_code: code, state: newState });
-            
-            updateRadarVisuals();
-            calculateBSM();
-
-            // Persist to DB
-            const { error } = await supabaseClient
-                .from('influences')
-                .upsert({ 
-                    account_id: currentAccountId, 
-                    influence_code: code, 
-                    state: newState,
-                    user_id: currentUser.id
-                }, { onConflict: 'account_id,influence_code' });
-        }
-
-        function updateRadarVisuals() {
-            VECTORS.forEach(v => {
-                const el = document.getElementById(`vector-${v.id}`);
-                const state = influences.find(inf => inf.influence_code === v.id)?.state || 'neutro';
-                
-                if(state === 'ativo') {
-                    el.classList.replace('fill-[#1e2937]', 'fill-[#f43f5e]');
-                    el.setAttribute('fill', '#f43f5e');
-                    el.setAttribute('stroke', '#e11d48');
-                } else if(state === 'removido') {
-                    el.classList.replace('fill-[#f43f5e]', 'fill-[#10b981]');
-                    el.setAttribute('fill', '#10b981');
-                    el.setAttribute('stroke', '#059669');
-                } else {
-                    el.setAttribute('fill', '#1e2937');
-                    el.setAttribute('stroke', '#334155');
-                }
-            });
-        }
-
-        function calculateBSM() {
-            const activeCount = influences.filter(inf => inf.state === 'ativo').length;
-            const gravit = (12 - activeCount) / 12;
-            const prob = Math.round(gravit * 100);
-
-            // Update UI
-            document.getElementById('radar-prob').innerText = prob + '%';
-            document.getElementById('global-gravit-text').innerText = prob + '%';
-            document.getElementById('metric-gravit').innerText = prob + '%';
-            
-            const ring = document.getElementById('global-gravit-path');
-            ring.setAttribute('stroke-dasharray', `${prob}, 100`);
-
-            // Status Label
-            let label = "NEBULA";
-            let color = "#ef4444";
-            if (gravit >= 0.92) { label = "THE CORE"; color = "#10b981"; }
-            else if (gravit >= 0.67) { label = "EVENT HORIZON"; color = "#0ea5e9"; }
-            else if (gravit >= 0.33) { label = "TRAÇÃO"; color = "#eab308"; }
-            
-            const lbl = document.getElementById('status-label');
-            lbl.innerText = label;
-            lbl.style.color = color;
-            ring.style.stroke = color;
-
-            generateBSMInsight(gravit, activeCount);
-        }
-
-        function generateBSMInsight(gravit, activeCount) {
-            const box = document.getElementById('insight-text');
-            const trigger = influences.find(inf => inf.state === 'ativo');
-            
-            if (activeCount >= 8) {
-                box.innerText = "NEBULA detectada – entropia máxima. Remova primeiro a Influência Gatilho S1 ou B3 para colapsar 2-3 bloqueios em cascata.";
-            } else if (gravit >= 0.67 && gravit < 0.92) {
-                box.innerText = "Event Horizon atingido. O território está no ponto de inevitabilidade. Próxima ação prioritária: Validação de Autoridade (S3).";
-            } else if (influences.some(inf => inf.influence_code === 'M4' && inf.state === 'ativo')) {
-                box.innerText = "Conflito de Valores (M4) bloqueando singularidade – alinhe com princípios não-negociáveis do decisor imediatamente.";
-            } else if (gravit >= 0.92) {
-                box.innerText = "Singularidade decisória atingida. O fechamento é uma consequência estrutural. Formalize os termos agora.";
-            } else {
-                box.innerText = `Território em fase de ${document.getElementById('status-label').innerText}. Foque na remoção dos bloqueios de classe ${trigger?.influence_code.startsWith('B') ? 'BIOLÓGICA' : 'SOCIAL'}.`;
-            }
-        }
-
-        // --- CRUD ACTIONS ---
-        async function deleteAccount(id) {
-            if(!confirm("Tem certeza que deseja remover este território? Isso não pode ser desfeito.")) return;
-            
-            await supabaseClient.from('accounts').delete().eq('id', id);
-            accounts = accounts.filter(a => a.id !== id);
-            if(currentAccountId === id) {
-                currentAccountId = null;
-                document.getElementById('radar-content').classList.add('hidden');
-                document.getElementById('radar-empty-state').classList.remove('hidden');
-            }
-            renderAccounts();
-            showToast("Território removido");
-        }
-
-        async function handleAddAction() {
-            const input = document.getElementById('new-action-input');
-            const desc = input.value.trim();
-            if(!desc || !currentAccountId) return;
-
-            const { data, error } = await supabaseClient
-                .from('actions')
-                .insert({
-                    account_id: currentAccountId,
-                    user_id: currentUser.id,
-                    description: desc,
-                    status: 'pending'
-                })
-                .select()
-                .single();
-
-            if(data) {
-                actions.unshift(data);
-                renderActions();
-                input.value = '';
-                showToast("Ação registrada");
-            }
-        }
-
-        // --- MODALS & UI ---
-        function showNewAccountModal() {
-            const overlay = document.getElementById('modal-overlay');
-            const title = document.getElementById('modal-title');
-            const content = document.getElementById('modal-content');
-            const saveBtn = document.getElementById('modal-save-btn');
-
-            title.innerText = "Novo Território";
-            content.innerHTML = `
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nome da Conta / Empresa</label>
-                        <input type="text" id="acc-name" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Valor Estimado (R$)</label>
-                        <input type="number" id="acc-value" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Fase Inicial</label>
-                        <select id="acc-status" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white">
-                            <option value="Lead">Lead</option>
-                            <option value="Tração">Tração</option>
-                            <option value="Event Horizon">Event Horizon</option>
-                        </select>
-                    </div>
-                </div>
-            `;
-
-            saveBtn.onclick = async () => {
-                const name = document.getElementById('acc-name').value;
-                const valor = document.getElementById('acc-value').value;
-                const status = document.getElementById('acc-status').value;
-
-                const { data, error } = await supabaseClient.from('accounts').insert({
-                    name, valor, status, user_id: currentUser.id
-                }).select().single();
-
-                if(data) {
-                    accounts.unshift(data);
-                    renderAccounts();
-                    closeModal();
-                    selectAccount(data.id);
-                }
-            };
-
-            overlay.classList.remove('hidden');
-            setTimeout(() => document.getElementById('modal-container').classList.remove('scale-95'), 10);
-        }
-
-        function closeModal() {
-            document.getElementById('modal-container').classList.add('scale-95');
-            setTimeout(() => document.getElementById('modal-overlay').classList.add('hidden'), 200);
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
-        }
-
-        function renderSkeletons(targetId, count) {
-            const target = document.getElementById(targetId);
-            target.innerHTML = Array(count).fill(0).map(() => `
-                <div class="h-24 w-full rounded-xl loading-skeleton opacity-20"></div>
-            `).join('');
-        }
-
-        async function autoSave() {
-            if(!currentAccountId) return;
-            // O sistema já salva nos cliques (clique-to-save), 
-            // este loop garante a sincronia das métricas calculadas.
-            const activeCount = influences.filter(inf => inf.state === 'ativo').length;
-            const gravit = (12 - activeCount) / 12;
-
-            await supabaseClient.from('bsm_metrics').upsert({
-                account_id: currentAccountId,
-                user_id: currentUser.id,
-                gravit: gravit,
-                idt: Math.round(gravit * 90), // Simulação de cálculo IDT
-                tes: 75,
-                eet: 88
-            }, { onConflict: 'account_id' });
-
-            showToast("Dados sincronizados");
-        }
-    </script>
 </body>
 </html>
