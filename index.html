@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSM™ | Business Structural Market System</title>
+    <title>BSM™ Core | Business Structural Market System</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,314 +12,242 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
-            --bsm-bg: #0f172a;
-            --bsm-panel: #1e2937;
-            --bsm-accent: #10b981;
-            --bsm-danger: #f43f5e;
-            --bsm-warning: #f59e0b;
-            --bsm-border: #334155;
+            --bsm-emerald: #10b981;
+            --bsm-rose: #f43f5e;
+            --bsm-amber: #f59e0b;
+            --bsm-slate-900: #0f172a;
+            --bsm-slate-950: #020617;
         }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background-color: var(--bsm-bg);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bsm-slate-950);
             color: #f8fafc;
-            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            overflow: hidden;
         }
 
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        .mono { font-family: 'JetBrains+Mono', monospace; }
 
-        /* Estética Apple/Linear */
-        .glass-header {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid var(--bsm-border);
+        /* Estética de Alta Engenharia (Apple/Linear) */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .card-bsm {
-            background: #1e2937;
-            border: 1px solid #334155;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card-bsm:hover {
-            border-color: #475569;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Radar Interativo */
         .radar-segment {
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
             cursor: pointer;
-            stroke-width: 1px;
-            stroke: #1e2937;
+            stroke-width: 0.5px;
         }
 
         .radar-segment:hover {
-            filter: brightness(1.2);
-            stroke-width: 2px;
-            stroke: #64748b;
+            filter: brightness(1.5) drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+            stroke-width: 1.5px;
         }
 
-        .gravit-meter-ring {
-            transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.5s ease;
+        /* Gravit Animation */
+        .gravit-ring {
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.65, 0, 0.35, 1);
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
         }
 
-        /* Scrollbar Apple Style */
-        ::-webkit-scrollbar { width: 6px; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        ::-webkit-scrollbar-thumb { background: #1e2937; border-radius: 10px; }
 
-        #dashboard { display: none; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fadeIn 0.4s ease-out forwards; }
+        #dashboard-ui { display: none; opacity: 0; transition: opacity 0.5s ease; }
+        .fade-in { opacity: 1 !important; }
 
-        /* Skeleton Loading */
-        .skeleton {
-            background: linear-gradient(90deg, #1e2937 25%, #334155 50%, #1e2937 75%);
-            background-size: 200% 100%;
-            animation: skeleton-load 1.5s infinite;
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
-        @keyframes skeleton-load { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .analyzing { animation: pulse-soft 2s infinite; }
     </style>
 </head>
-<body>
+<body class="selection:bg-emerald-500/30">
 
-    <div id="login-screen" class="min-h-screen flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
-        <div class="w-full max-w-md animate-in">
+    <div id="auth-ui" class="fixed inset-0 z-[1000] flex items-center justify-center bg-[radial-gradient(circle_at_top,_#1e2937_0%,_#020617_100%)]">
+        <div class="w-full max-w-sm p-8">
             <div class="text-center mb-10">
                 <h1 class="text-5xl font-black tracking-tighter text-white mb-2">BSM<span class="text-emerald-500">™</span></h1>
-                <p class="text-slate-400 font-medium tracking-tight">Business Structural Market System</p>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-[0.3em]">Market Engineering Core</p>
             </div>
             
-            <div class="bg-[#1e2937] p-10 rounded-[2rem] border border-slate-800 shadow-2xl">
-                <form id="login-form" class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">E-mail</label>
-                        <input type="email" id="email" required class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all" placeholder="seu@email.com">
+            <div class="glass-panel p-8 rounded-[2.5rem] shadow-2xl">
+                <form id="login-form" class="space-y-5">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Terminal ID (Email)</label>
+                        <input type="email" id="email" required class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all placeholder:text-slate-700" placeholder="engenheiro@bsm.com">
                     </div>
-                    <div>
-                        <div class="flex justify-between mb-2">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Senha</label>
-                            <button type="button" onclick="handleResetPassword()" class="text-[10px] text-emerald-500 font-bold hover:underline">ESQUECI A SENHA</button>
-                        </div>
-                        <input type="password" id="password" required class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all" placeholder="••••••••">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Access Key</label>
+                        <input type="password" id="password" required class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all placeholder:text-slate-700" placeholder="••••••••">
                     </div>
-                    <div id="login-error" class="hidden text-rose-500 text-xs font-bold text-center bg-rose-500/10 py-3 rounded-xl border border-rose-500/20">
-                        E-mail ou senha inválidos. Tente novamente.
-                    </div>
-                    <button type="submit" id="btn-login" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-5 rounded-2xl transition-all shadow-lg shadow-emerald-900/20 active:scale-[0.98]">
-                        ACESSAR DASHBOARD
+                    <div id="login-error" class="hidden text-rose-500 text-[10px] font-bold text-center uppercase tracking-tighter py-2">Credenciais Inválidas ou Erro de Conexão</div>
+                    <button type="submit" id="btn-login" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all active:scale-[0.97] shadow-lg shadow-emerald-900/20">
+                        INICIALIZAR PROTOCOLO
                     </button>
                 </form>
             </div>
-            <p class="mt-8 text-center text-slate-600 text-[10px] uppercase font-bold tracking-[0.3em]">Execution Strategy · v3.0.1</p>
         </div>
     </div>
 
-    <div id="dashboard" class="flex flex-col min-h-screen">
-        <header class="glass-header sticky top-0 z-50 h-[64px] px-8 flex items-center justify-between">
+    <div id="dashboard-ui" class="flex flex-col h-screen">
+        
+        <nav class="h-16 border-b border-slate-800 px-8 flex items-center justify-between bg-slate-950/50 backdrop-blur-md">
             <div class="flex items-center gap-6">
-                <span class="text-2xl font-black tracking-tighter text-white">BSM™</span>
-                <div class="h-4 w-px bg-slate-700"></div>
-                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest hidden lg:block">Territory · Influence · Execution</span>
+                <span class="text-2xl font-black tracking-tighter">BSM™</span>
+                <div class="h-4 w-px bg-slate-800"></div>
+                <div class="flex flex-col">
+                    <span id="nav-acc-name" class="text-xs font-black text-white uppercase tracking-tight">Selecione um Território</span>
+                    <span id="nav-acc-status" class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Aguardando Conexão</span>
+                </div>
             </div>
 
-            <div class="flex items-center gap-10">
-                <div class="flex items-center gap-4 bg-slate-900/50 px-5 py-2 rounded-full border border-slate-800">
-                    <div class="relative w-9 h-9">
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-4 bg-slate-900/50 px-4 py-1.5 rounded-full border border-slate-800">
+                    <div class="relative w-8 h-8">
                         <svg class="w-full h-full" viewBox="0 0 36 36">
                             <circle cx="18" cy="18" r="16" fill="none" class="stroke-slate-800" stroke-width="3"></circle>
-                            <path id="global-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="gravit-meter-ring stroke-emerald-500" stroke-width="3" stroke-dasharray="0, 100"></path>
+                            <path id="global-gravit-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="gravit-ring stroke-emerald-500" stroke-width="3" stroke-dasharray="0, 100"></path>
                         </svg>
-                        <div id="global-gravit-val" class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">0%</div>
+                        <div id="global-gravit-val" class="absolute inset-0 flex items-center justify-center text-[9px] font-black">0%</div>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest leading-none mb-1">GRAVIT™ Global</span>
-                        <span id="global-status" class="text-[10px] font-black text-emerald-500 uppercase leading-none">INATIVO</span>
-                    </div>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Gravit™ Force</span>
                 </div>
 
-                <div class="flex items-center gap-4">
-                    <button onclick="openModal('new-account')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black px-6 py-3 rounded-full transition-all shadow-lg shadow-emerald-900/20">
-                        + NOVA CONTA
-                    </button>
-                    <button onclick="handleLogout()" class="p-2 text-slate-500 hover:text-white transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    </button>
-                </div>
+                <button onclick="openModal('new-account')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-5 py-2.5 rounded-full transition-all active:scale-95 shadow-lg shadow-emerald-900/10">
+                    NOVA CONTA
+                </button>
+                <button onclick="handleLogout()" class="text-slate-500 hover:text-rose-500 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                </button>
             </div>
-        </header>
+        </nav>
 
-        <main class="flex-1 max-w-[1800px] w-full mx-auto p-8 grid grid-cols-12 gap-8">
+        <main class="flex-1 flex overflow-hidden">
             
-            <section class="col-span-12 xl:col-span-3 space-y-4">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-black text-white">Territórios Ativos</h2>
-                    <span id="acc-total" class="bg-slate-800 text-slate-400 text-[10px] px-2 py-1 rounded font-bold">0</span>
+            <aside class="w-80 border-r border-slate-800 flex flex-col bg-slate-950/30">
+                <div class="p-6">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Territórios Operacionais</h3>
+                    <div id="accounts-list" class="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
+                        </div>
                 </div>
-                <div id="accounts-list" class="space-y-3 overflow-y-auto max-h-[calc(100vh-220px)] pr-2">
-                    </div>
-            </section>
+            </aside>
 
-            <section class="col-span-12 xl:col-span-6 flex flex-col items-center">
-                <div id="radar-container" class="w-full bg-[#1e2937]/30 border border-slate-800 rounded-[3rem] p-12 flex flex-col items-center justify-center relative min-h-[650px]">
-                    
-                    <div id="empty-state" class="text-center space-y-6">
-                        <div class="w-24 h-24 bg-slate-800 rounded-[2rem] flex items-center justify-center mx-auto opacity-40">
-                            <svg class="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A2 2 0 013 15.485V6.414m9.927 8.242l.271.135a2 2 0 01.896.896l.135.271m-9.043-9.043L3.586 4.586a2 2 0 012.828 0L9 7.172m0 0L20.414 7.172a2 2 0 011.414.586L22 8.172m-11 11V11.172" /></svg>
-                        </div>
-                        <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">Selecione um território para carregar o Radar BSM™</p>
+            <section class="flex-1 relative flex items-center justify-center p-12 bg-[radial-gradient(circle_at_center,_#111827_0%,_transparent_70%)]">
+                
+                <div id="radar-empty" class="text-center max-w-xs">
+                    <div class="w-20 h-20 bg-slate-900 border border-slate-800 rounded-[2rem] flex items-center justify-center mx-auto mb-6 opacity-30">
+                        <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     </div>
-
-                    <div id="radar-active" class="hidden w-full flex flex-col items-center animate-in">
-                        <h3 id="current-account-name" class="text-3xl font-black text-white tracking-tighter mb-10">---</h3>
-                        
-                        <div class="relative">
-                            <svg id="bsm-radar-svg" width="450" height="450" viewBox="0 0 450 450" class="drop-shadow-[0_0_50px_rgba(16,185,129,0.1)]"></svg>
-                            
-                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div class="w-[130px] h-[130px] rounded-full bg-slate-950 border-2 border-slate-800 flex flex-col items-center justify-center shadow-2xl">
-                                    <span id="center-prob" class="text-3xl font-black text-white leading-none">0%</span>
-                                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-tighter mt-1">Fechamento</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-12 w-full max-w-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/20 p-6 rounded-3xl shadow-inner relative overflow-hidden">
-                            <div class="flex items-center gap-3 mb-3 relative z-10">
-                                <span class="flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                                <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">Diagnóstico de Estrutura</span>
-                            </div>
-                            <p id="insight-text" class="text-slate-300 text-sm leading-relaxed italic relative z-10">Mapeando vetores de influência...</p>
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-[60px]"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="col-span-12 xl:col-span-3 space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="card-bsm p-5 rounded-3xl">
-                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">IDT™</span>
-                        <div id="metric-idt" class="text-2xl font-black text-white">--</div>
-                    </div>
-                    <div class="card-bsm p-5 rounded-3xl">
-                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">TES™</span>
-                        <div id="metric-tes" class="text-2xl font-black text-white">--</div>
-                    </div>
-                    <div class="card-bsm p-5 rounded-3xl">
-                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">EET™</span>
-                        <div id="metric-eet" class="text-2xl font-black text-white">--</div>
-                    </div>
-                    <div class="card-bsm p-5 rounded-3xl">
-                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">GRAVIT™</span>
-                        <div id="metric-gravit" class="text-2xl font-black text-white">--</div>
-                    </div>
+                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Nenhum território selecionado para análise de influência tática.</p>
                 </div>
 
-                <div class="flex flex-col h-[calc(100vh-420px)]">
-                    <h3 class="text-sm font-black text-white uppercase tracking-widest mb-4">Plano de Execução</h3>
-                    <div id="actions-list" class="flex-1 overflow-y-auto space-y-3 pr-2 mb-4">
+                <div id="radar-ui" class="hidden w-full h-full flex flex-col items-center justify-center fade-in">
+                    <div class="absolute top-12 left-12 grid grid-cols-2 gap-4">
+                        <div class="glass-panel p-4 rounded-3xl min-w-[120px]">
+                            <span class="text-[9px] font-black text-slate-500 uppercase block mb-1">IDT™ Index</span>
+                            <span id="stat-idt" class="text-xl font-black text-white">0%</span>
                         </div>
+                        <div class="glass-panel p-4 rounded-3xl min-w-[120px]">
+                            <span class="text-[9px] font-black text-slate-500 uppercase block mb-1">Entropy</span>
+                            <span id="stat-entropy" class="text-xl font-black text-rose-500">MAX</span>
+                        </div>
+                    </div>
+
                     <div class="relative group">
-                        <input type="text" id="action-input" placeholder="Definir nova ação tática..." class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-emerald-500 transition-all pr-12">
-                        <button onclick="handleCreateAction()" class="absolute right-2 top-2 bottom-2 w-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white hover:bg-emerald-500 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <svg id="bsm-radar-svg" width="500" height="500" viewBox="0 0 500 500" class="drop-shadow-[0_0_60px_rgba(16,185,129,0.05)]"></svg>
+                        
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="w-[140px] h-[140px] rounded-full bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-center shadow-2xl">
+                                <span id="radar-prob-val" class="text-4xl font-black text-white leading-none">0%</span>
+                                <span class="text-[9px] font-black text-slate-600 uppercase mt-2 tracking-widest">Probability</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 w-full max-w-xl glass-panel p-6 rounded-[2rem] border-emerald-500/10">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">BSM™ Intelligence Insight</span>
+                        </div>
+                        <p id="insight-box" class="text-slate-400 text-sm italic font-medium">Aguardando definição de vetores...</p>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="w-96 border-l border-slate-800 flex flex-col bg-slate-950/30 p-8">
+                <div class="flex flex-col h-full">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Plano de Execução Tática</h3>
+                    
+                    <div id="actions-list" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-6">
+                        </div>
+
+                    <div class="relative">
+                        <textarea id="action-input" rows="2" placeholder="Nova diretriz estratégica..." class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none"></textarea>
+                        <button onclick="submitAction()" class="absolute bottom-3 right-3 p-2 bg-emerald-600 rounded-xl text-white hover:bg-emerald-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
                         </button>
                     </div>
                 </div>
-            </section>
+            </aside>
         </main>
     </div>
 
-    <div id="modal-overlay" class="fixed inset-0 z-[100] hidden bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-6">
-        <div id="modal-content" class="bg-slate-900 w-full max-w-lg rounded-[2.5rem] border border-slate-800 p-10 shadow-2xl relative">
+    <div id="modal-container" class="fixed inset-0 z-[2000] hidden flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+        <div class="bg-slate-900 w-full max-w-lg rounded-[2.5rem] border border-slate-800 p-10 relative shadow-2xl">
             <h2 id="modal-title" class="text-2xl font-black text-white mb-8 tracking-tighter">Novo Território</h2>
-            <div id="modal-body" class="space-y-6"></div>
+            <div id="modal-content" class="space-y-6">
+                </div>
             <div class="flex justify-end gap-4 mt-10">
-                <button onclick="closeModal()" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Cancelar</button>
-                <button id="modal-save-btn" class="bg-emerald-600 px-10 py-4 rounded-2xl text-white font-black text-xs shadow-lg shadow-emerald-900/20 active:scale-95 transition-all uppercase">Salvar</button>
+                <button onclick="closeModal()" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Abortar</button>
+                <button id="modal-confirm" class="bg-emerald-600 px-10 py-4 rounded-2xl text-white font-black text-xs shadow-lg hover:bg-emerald-500 transition-all active:scale-95">CONFIRMAR</button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-10 right-10 z-[200] translate-y-20 opacity-0 transition-all duration-500 flex items-center gap-3 bg-emerald-600 text-white px-8 py-4 rounded-2xl shadow-2xl">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-        <span id="toast-msg" class="font-bold text-sm tracking-tight italic">Dados sincronizados com o Core.</span>
-    </div>
-
     <script>
-        // CONFIGURAÇÃO SUPABASE OBRIGATÓRIA (FIXED AUDIT)
+        // CONFIGURAÇÃO SUPABASE (PADRONIZADO)
         const SUPABASE_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
         
-        // Inicialização robusta para evitar erro de inicialização variável
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Inicialização com Fallback de Engenharia
+        let supabase;
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.error("Erro Crítico: SDK Supabase não carregado.", e);
+        }
 
-        // ESTADO GLOBAL
-        let currentUser = null;
+        // STATE MANAGER
+        let user = null;
         let accounts = [];
         let currentAccountId = null;
         let influences = [];
-        let actions = [];
 
-        // MAPEAMENTO DOS 12 VETORES BSM™
-        const BSM_VECTORS = [
-            { id: 'B1', name: 'Energia', color: '#ef4444' },
-            { id: 'B2', name: 'Tempo', color: '#f59e0b' },
-            { id: 'B3', name: 'Dinheiro', color: '#eab308' },
-            { id: 'B4', name: 'Eficiência', color: '#84cc16' },
-            { id: 'S1', name: 'Pertencimento', color: '#22c55e' },
-            { id: 'S2', name: 'Status', color: '#10b981' },
-            { id: 'S3', name: 'Autoridade', color: '#06b67f' },
-            { id: 'S4', name: 'Escassez', color: '#0ea5e9' },
-            { id: 'M1', name: 'Prova', color: '#3b82f6' },
-            { id: 'M2', name: 'Comparação', color: '#6366f1' },
-            { id: 'M3', name: 'Intuição', color: '#8b5cf6' },
-            { id: 'M4', name: 'Valores', color: '#a855f7' }
+        // VETORES BSM™ (ESTRUTURA JADIEL FREITAS)
+        const VECTORS = [
+            { id: 'B1', name: 'Energia', group: 'Barreira' },
+            { id: 'B2', name: 'Tempo', group: 'Barreira' },
+            { id: 'B3', name: 'Dinheiro', group: 'Barreira' },
+            { id: 'B4', name: 'Eficiência', group: 'Barreira' },
+            { id: 'S1', name: 'Pertencimento', group: 'Social' },
+            { id: 'S2', name: 'Status', group: 'Social' },
+            { id: 'S3', name: 'Autoridade', group: 'Social' },
+            { id: 'S4', name: 'Escassez', group: 'Social' },
+            { id: 'M1', name: 'Prova', group: 'Mecanismo' },
+            { id: 'M2', name: 'Comparação', group: 'Mecanismo' },
+            { id: 'M3', name: 'Intuição', group: 'Mecanismo' },
+            { id: 'M4', name: 'Valores', group: 'Mecanismo' }
         ];
 
-        // --- CORE: INICIALIZAÇÃO ---
-        window.onload = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                initDashboard(session.user);
-            } else {
-                toggleScreen('login-screen');
-            }
-
-            // Monitoramento de Auth
-            supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN') initDashboard(session.user);
-                if (event === 'SIGNED_OUT') toggleScreen('login-screen');
-            });
-
-            // Gerar estrutura visual do Radar
-            buildRadarSVG();
-            
-            // Loop de Sincronização Automática (8s)
-            setInterval(syncMetricsToDB, 8000);
-        };
-
-        function toggleScreen(screenId) {
-            document.getElementById('login-screen').style.display = screenId === 'login-screen' ? 'flex' : 'none';
-            document.getElementById('dashboard').style.display = screenId === 'dashboard' ? 'flex' : 'none';
-        }
-
-        async function initDashboard(user) {
-            currentUser = user;
-            toggleScreen('dashboard');
-            await loadAccounts();
-        }
-
-        // --- AUTH: FLUXOS ---
+        // --- AUTH ENGINE ---
         document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -327,16 +255,16 @@
             const btn = document.getElementById('btn-login');
 
             btn.disabled = true;
-            btn.innerText = "VERIFICANDO...";
+            btn.innerText = "AUTENTICANDO...";
 
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             
             if (error) {
-                const errDiv = document.getElementById('login-error');
-                errDiv.classList.remove('hidden');
+                document.getElementById('login-error').classList.remove('hidden');
                 btn.disabled = false;
-                btn.innerText = "ACESSAR DASHBOARD";
-                setTimeout(() => errDiv.classList.add('hidden'), 4000);
+                btn.innerText = "INICIALIZAR PROTOCOLO";
+            } else {
+                initApp(data.user);
             }
         };
 
@@ -345,22 +273,20 @@
             window.location.reload();
         }
 
-        async function handleResetPassword() {
-            const email = document.getElementById('email').value;
-            if (!email) return alert("Insira seu e-mail para recuperação.");
-            await supabase.auth.resetPasswordForEmail(email);
-            showToast("Link de recuperação enviado.");
+        async function initApp(userData) {
+            user = userData;
+            document.getElementById('auth-ui').style.display = 'none';
+            const dash = document.getElementById('dashboard-ui');
+            dash.style.display = 'flex';
+            setTimeout(() => dash.classList.add('fade-in'), 100);
+            
+            await loadAccounts();
+            buildRadar();
         }
 
-        // --- DATA: CONTAS E MÉTRIZES ---
+        // --- DATA ENGINE ---
         async function loadAccounts() {
-            renderSkeletons('accounts-list', 3);
-            const { data, error } = await supabase
-                .from('accounts')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: false });
-
+            const { data, error } = await supabase.from('accounts').select('*').order('created_at', { ascending: false });
             if (data) {
                 accounts = data;
                 renderAccounts();
@@ -368,283 +294,211 @@
         }
 
         function renderAccounts() {
-            const list = document.getElementById('accounts-list');
-            document.getElementById('acc-total').innerText = accounts.length;
-            
-            list.innerHTML = accounts.map(acc => `
-                <div onclick="selectAccount('${acc.id}')" data-id="${acc.id}" class="card-bsm p-5 rounded-3xl cursor-pointer group relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-2 relative z-10">
-                        <h4 class="font-bold text-white group-hover:text-emerald-400 transition-colors">${acc.name}</h4>
-                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="event.stopPropagation(); deleteAccount('${acc.id}')" class="text-rose-500 hover:text-rose-400 p-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                        </div>
+            const container = document.getElementById('accounts-list');
+            container.innerHTML = accounts.map(acc => `
+                <div onclick="selectAccount('${acc.id}')" data-acc-id="${acc.id}" class="acc-card glass-panel p-5 rounded-[1.5rem] cursor-pointer hover:border-emerald-500/50 transition-all group relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-bold text-white group-hover:text-emerald-400 transition-colors truncate">${acc.name}</h4>
+                        <button onclick="event.stopPropagation(); deleteAccount('${acc.id}')" class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-rose-500 p-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </button>
                     </div>
-                    <div class="flex items-center justify-between relative z-10">
+                    <div class="flex items-center justify-between">
                         <span class="mono text-[10px] text-slate-500">R$ ${Number(acc.valor).toLocaleString('pt-BR')}</span>
-                        <span class="text-[9px] font-black uppercase tracking-tighter ${acc.status === 'Event Horizon' ? 'text-emerald-500' : 'text-slate-500'}">${acc.status}</span>
+                        <span class="text-[9px] font-black uppercase ${acc.status === 'Event Horizon' ? 'text-emerald-500' : 'text-slate-600'}">${acc.status}</span>
                     </div>
-                    <div class="absolute inset-0 bg-emerald-500/5 translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
                 </div>
             `).join('');
         }
 
         async function selectAccount(id) {
             currentAccountId = id;
-            const account = accounts.find(a => a.id === id);
+            const acc = accounts.find(a => a.id === id);
             
-            document.getElementById('empty-state').classList.add('hidden');
-            document.getElementById('radar-active').classList.remove('hidden');
-            document.getElementById('current-account-name').innerText = account.name;
-            
-            // UI Selection Highlighting
-            document.querySelectorAll('.card-bsm').forEach(c => c.classList.remove('border-emerald-500', 'bg-emerald-500/5'));
-            document.querySelector(`[data-id="${id}"]`).classList.add('border-emerald-500', 'bg-emerald-500/5');
+            document.getElementById('radar-empty').classList.add('hidden');
+            document.getElementById('radar-ui').classList.remove('hidden');
+            document.getElementById('nav-acc-name').innerText = acc.name;
+            document.getElementById('nav-acc-status').innerText = `Status: ${acc.status}`;
 
-            await Promise.all([
-                loadInfluences(id),
-                loadActions(id),
-                loadMetrics(id)
-            ]);
+            // Visual active state
+            document.querySelectorAll('.acc-card').forEach(el => el.classList.remove('border-emerald-500', 'bg-emerald-500/5'));
+            document.querySelector(`[data-acc-id="${id}"]`).classList.add('border-emerald-500', 'bg-emerald-500/5');
 
-            // Real-time subscribe
-            supabase.channel(`room-${id}`).on('postgres_changes', { event: '*', schema: 'public', table: 'influences' }, payload => {
-                loadInfluences(id);
-            }).subscribe();
-
-            calculateBSMLogic();
+            await Promise.all([loadInfluences(), loadActions()]);
+            processBSM();
         }
 
-        // --- ENGINE: RADAR BSM™ ---
-        function buildRadarSVG() {
+        // --- RADAR BSM™ LOGIC ---
+        function buildRadar() {
             const svg = document.getElementById('bsm-radar-svg');
-            const center = 225;
-            const radius = 200;
-            const inner = 70;
+            const center = 250;
+            const radius = 220;
+            const inner = 80;
 
-            BSM_VECTORS.forEach((v, i) => {
-                const angleStart = (i * 30 - 90) * (Math.PI / 180);
-                const angleEnd = ((i + 1) * 30 - 90) * (Math.PI / 180);
+            VECTORS.forEach((v, i) => {
+                const startAngle = (i * 30 - 90) * (Math.PI / 180);
+                const endAngle = ((i + 1) * 30 - 90) * (Math.PI / 180);
                 
-                const p1 = [center + radius * Math.cos(angleStart), center + radius * Math.sin(angleStart)];
-                const p2 = [center + radius * Math.cos(angleEnd), center + radius * Math.sin(angleEnd)];
-                const p3 = [center + inner * Math.cos(angleEnd), center + inner * Math.sin(angleEnd)];
-                const p4 = [center + inner * Math.cos(angleStart), center + inner * Math.sin(angleStart)];
+                const p1 = [center + radius * Math.cos(startAngle), center + radius * Math.sin(startAngle)];
+                const p2 = [center + radius * Math.cos(endAngle), center + radius * Math.sin(endAngle)];
+                const p3 = [center + inner * Math.cos(endAngle), center + inner * Math.sin(endAngle)];
+                const p4 = [center + inner * Math.cos(startAngle), center + inner * Math.sin(startAngle)];
 
                 const d = `M ${p1[0]} ${p1[1]} A ${radius} ${radius} 0 0 1 ${p2[0]} ${p2[1]} L ${p3[0]} ${p3[1]} A ${inner} ${inner} 0 0 0 ${p4[0]} ${p4[1]} Z`;
                 
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("d", d);
-                path.setAttribute("id", `vector-${v.id}`);
-                path.setAttribute("class", "radar-segment fill-[#1e2937] stroke-[#0f172a]");
-                path.onclick = () => cycleVector(v.id);
+                path.setAttribute("id", `vec-${v.id}`);
+                path.setAttribute("class", "radar-segment fill-slate-900/50 stroke-slate-800");
+                path.onclick = () => toggleInfluence(v.id);
                 
-                // Tooltip
-                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-                title.textContent = `${v.id} - ${v.name}`;
-                path.appendChild(title);
-
                 svg.appendChild(path);
 
                 // Labels
                 const textAngle = (i * 30 - 75) * (Math.PI / 180);
                 const tx = center + (radius + 25) * Math.cos(textAngle);
                 const ty = center + (radius + 25) * Math.sin(textAngle);
-                
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("x", tx);
                 text.setAttribute("y", ty);
                 text.setAttribute("text-anchor", "middle");
-                text.setAttribute("class", "fill-slate-500 font-black text-[10px] mono tracking-widest");
+                text.setAttribute("class", "fill-slate-600 font-black text-[10px] mono tracking-widest");
                 text.textContent = v.id;
                 svg.appendChild(text);
             });
         }
 
-        async function cycleVector(code) {
-            if (!currentAccountId) return;
-            
+        async function toggleInfluence(code) {
             const existing = influences.find(inf => inf.influence_code === code);
             let nextState = 'neutro';
 
             if (!existing || existing.state === 'neutro') nextState = 'ativo';
             else if (existing.state === 'ativo') nextState = 'removido';
-            else nextState = 'neutro';
 
-            // Local Update
+            // Optimistic UI
             if (existing) existing.state = nextState;
-            else influences.push({ account_id: currentAccountId, influence_code: code, state: nextState });
+            else influences.push({ influence_code: code, state: nextState });
 
             renderRadarStates();
-            calculateBSMLogic();
+            processBSM();
 
-            // DB Persist
+            // Persist
             await supabase.from('influences').upsert({
                 account_id: currentAccountId,
-                user_id: currentUser.id,
+                user_id: user.id,
                 influence_code: code,
                 state: nextState
             }, { onConflict: 'account_id,influence_code' });
         }
 
         function renderRadarStates() {
-            BSM_VECTORS.forEach(v => {
-                const el = document.getElementById(`vector-${v.id}`);
+            VECTORS.forEach(v => {
+                const el = document.getElementById(`vec-${v.id}`);
                 const state = influences.find(inf => inf.influence_code === v.id)?.state || 'neutro';
                 
                 if (state === 'ativo') {
-                    el.style.fill = '#f43f5e'; // Bloqueio
-                    el.style.stroke = '#be123c';
+                    el.style.fill = 'rgba(244, 63, 94, 0.4)'; el.style.stroke = '#f43f5e';
                 } else if (state === 'removido') {
-                    el.style.fill = '#10b981'; // Removido
-                    el.style.stroke = '#059669';
+                    el.style.fill = 'rgba(16, 185, 129, 0.4)'; el.style.stroke = '#10b981';
                 } else {
-                    el.style.fill = '#1e2937'; // Neutro
-                    el.style.stroke = '#0f172a';
+                    el.style.fill = 'rgba(15, 23, 42, 0.5)'; el.style.stroke = '#1e2937';
                 }
             });
         }
 
-        function calculateBSMLogic() {
-            const activeCount = influences.filter(inf => inf.state === 'ativo').length;
-            const gravit = (12 - activeCount) / 12;
-            const prob = Math.round(gravit * 95); // BSM base calc
-
-            // UI Feedback
-            document.getElementById('center-prob').innerText = prob + '%';
-            document.getElementById('global-gravit-val').innerText = Math.round(gravit * 100) + '%';
-            document.getElementById('metric-gravit').innerText = Math.round(gravit * 100) + '%';
-            document.getElementById('metric-idt').innerText = (prob > 70 ? 'ALTO' : prob > 30 ? 'MÉDIO' : 'BAIXO');
+        function processBSM() {
+            const active = influences.filter(inf => inf.state === 'ativo').length;
+            const removed = influences.filter(inf => inf.state === 'removido').length;
             
-            const ring = document.getElementById('global-ring');
-            ring.setAttribute('stroke-dasharray', `${Math.round(gravit * 100)}, 100`);
+            // Fórmula BSM™: Gravit = (12 - Ativos) / 12
+            const gravit = (12 - active) / 12;
+            const prob = Math.round(gravit * 95);
 
-            // Status Logic
-            const statusLabel = document.getElementById('global-status');
-            if (gravit >= 0.92) {
-                statusLabel.innerText = "THE CORE";
-                statusLabel.style.color = "#10b981";
-                ring.style.stroke = "#10b981";
-            } else if (gravit >= 0.67) {
-                statusLabel.innerText = "EVENT HORIZON";
-                statusLabel.style.color = "#3b82f6";
-                ring.style.stroke = "#3b82f6";
-            } else if (gravit >= 0.33) {
-                statusLabel.innerText = "TRAÇÃO";
-                statusLabel.style.color = "#f59e0b";
-                ring.style.stroke = "#f59e0b";
-            } else {
-                statusLabel.innerText = "NEBULA";
-                statusLabel.style.color = "#f43f5e";
-                ring.style.stroke = "#f43f5e";
-            }
+            document.getElementById('radar-prob-val').innerText = prob + '%';
+            document.getElementById('stat-idt').innerText = prob + '%';
+            document.getElementById('stat-entropy').innerText = active > 7 ? 'CRÍTICA' : active > 4 ? 'ALTA' : 'ESTÁVEL';
+            document.getElementById('global-gravit-val').innerText = Math.round(gravit * 100) + '%';
+            
+            const path = document.getElementById('global-gravit-path');
+            path.setAttribute('stroke-dasharray', `${Math.round(gravit * 100)}, 100`);
 
-            generateBSMInsight(gravit, activeCount);
-        }
-
-        function generateBSMInsight(gravit, active) {
-            const box = document.getElementById('insight-text');
-            const hasS1 = influences.some(i => i.influence_code === 'S1' && i.state === 'ativo');
-            const hasM4 = influences.some(i => i.influence_code === 'M4' && i.state === 'ativo');
-
+            // Intelligent Insights
+            const box = document.getElementById('insight-box');
             if (active >= 8) {
-                box.innerText = "NEBULA detectada – entropia máxima. Remova primeiro a Influência Gatilho S1 ou B3 para colapsar bloqueios em cascata.";
-            } else if (hasM4) {
-                box.innerText = "Conflito de Valores (M4) detectado. O decisor não avançará enquanto a solução ferir princípios não-negociáveis.";
-            } else if (gravit >= 0.67 && gravit < 0.92) {
-                box.innerText = "Event Horizon atingido. O território está no ponto de inevitabilidade. Próxima ação: Validação de Autoridade (S3).";
-            } else if (gravit >= 0.92) {
-                box.innerText = "Singularidade decisória atingida. O fechamento é uma consequência estrutural do mercado.";
+                box.innerText = "Saturação de barreiras detectada. O território está em estado de inércia absoluta. Foque na remoção de S1 (Pertencimento) para gerar movimento inicial.";
+            } else if (prob > 70) {
+                box.innerText = "Zona de Event Horizon atingida. O fechamento agora é uma questão estrutural. Garanta que o vetor M1 (Prova) esteja validado.";
             } else {
-                box.innerText = "Estrutura estável. Analise se a Influência Gatilho de Status (S2) pode acelerar a remoção de barreiras financeiras.";
+                box.innerText = "Movimentação tática em curso. Aumente a Autoridade (S3) para colapsar as barreiras de Eficiência (B4).";
             }
         }
 
-        // --- CRUD: AÇÕES E EXCLUSÃO ---
-        async function loadInfluences(accId) {
-            const { data } = await supabase.from('influences').select('*').eq('account_id', accId);
-            influences = data || [];
-            renderRadarStates();
-        }
-
-        async function loadActions(accId) {
-            const { data } = await supabase.from('actions').select('*').eq('account_id', accId).order('created_at', { ascending: false });
-            actions = data || [];
-            renderActions();
-        }
-
-        function renderActions() {
-            const list = document.getElementById('actions-list');
-            list.innerHTML = actions.map(act => `
-                <div class="p-4 bg-slate-900/50 border border-slate-800 rounded-2xl text-xs animate-in">
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="text-slate-300 font-medium leading-relaxed">${act.description}</span>
-                        <span class="text-[9px] font-bold text-slate-600 mono">${new Date(act.created_at).toLocaleDateString()}</span>
+        // --- ACTIONS ENGINE ---
+        async function loadActions() {
+            const { data } = await supabase.from('actions').select('*').eq('account_id', currentAccountId).order('created_at', { ascending: false });
+            if (data) {
+                const list = document.getElementById('actions-list');
+                list.innerHTML = data.map(act => `
+                    <div class="glass-panel p-4 rounded-2xl border-l-2 border-emerald-500/50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[9px] font-black text-slate-500 uppercase">${new Date(act.created_at).toLocaleDateString()}</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                        </div>
+                        <p class="text-[11px] text-slate-300 leading-relaxed font-medium">${act.description}</p>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
-        async function handleCreateAction() {
+        async function submitAction() {
             const input = document.getElementById('action-input');
             const desc = input.value.trim();
             if (!desc || !currentAccountId) return;
 
-            const { data, error } = await supabase.from('actions').insert({
+            const { data } = await supabase.from('actions').insert({
                 account_id: currentAccountId,
-                user_id: currentUser.id,
+                user_id: user.id,
                 description: desc
             }).select().single();
 
             if (data) {
-                actions.unshift(data);
-                renderActions();
                 input.value = '';
-                showToast("Ação tática registrada.");
+                await loadActions();
             }
         }
 
-        async function deleteAccount(id) {
-            if (!confirm("Tem certeza que deseja remover este território? Isso não pode ser desfeito.")) return;
-            
-            await supabase.from('accounts').delete().eq('id', id);
-            accounts = accounts.filter(a => a.id !== id);
-            if (currentAccountId === id) {
-                currentAccountId = null;
-                document.getElementById('radar-active').classList.add('hidden');
-                document.getElementById('empty-state').classList.remove('hidden');
-            }
-            renderAccounts();
-            showToast("Território removido com sucesso.");
+        // --- UTILS & MODAIS ---
+        async function loadInfluences() {
+            const { data } = await supabase.from('influences').select('*').eq('account_id', currentAccountId);
+            influences = data || [];
+            renderRadarStates();
         }
 
-        // --- UI: MODAIS E TOASTS ---
         function openModal(type) {
-            const overlay = document.getElementById('modal-overlay');
-            const body = document.getElementById('modal-body');
-            const saveBtn = document.getElementById('modal-save-btn');
+            const container = document.getElementById('modal-container');
+            const content = document.getElementById('modal-content');
+            const confirm = document.getElementById('modal-confirm');
 
             if (type === 'new-account') {
-                body.innerHTML = `
+                content.innerHTML = `
                     <div class="space-y-4">
-                        <input id="new-name" type="text" placeholder="Nome do Território" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
-                        <input id="new-valor" type="number" placeholder="Valor Estimado (R$)" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
-                        <select id="new-status" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
+                        <input id="n-name" type="text" placeholder="Nome da Conta" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
+                        <input id="n-valor" type="number" placeholder="Valor Estimado (R$)" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
+                        <select id="n-status" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
                             <option value="Lead">Lead</option>
                             <option value="Tração">Tração</option>
                             <option value="Event Horizon">Event Horizon</option>
-                            <option value="Core">Core</option>
                         </select>
                     </div>
                 `;
-                saveBtn.onclick = async () => {
-                    const name = document.getElementById('new-name').value;
-                    const valor = document.getElementById('new-valor').value;
-                    const status = document.getElementById('new-status').value;
-                    
-                    const { data, error } = await supabase.from('accounts').insert({
-                        name, valor, status, user_id: currentUser.id
+                confirm.onclick = async () => {
+                    const name = document.getElementById('n-name').value;
+                    const valor = document.getElementById('n-valor').value;
+                    const status = document.getElementById('n-status').value;
+                    if (!name) return;
+
+                    const { data } = await supabase.from('accounts').insert({
+                        name, valor, status, user_id: user.id
                     }).select().single();
 
                     if (data) {
@@ -655,46 +509,24 @@
                     }
                 };
             }
-            overlay.classList.remove('hidden');
+            container.classList.remove('hidden');
         }
 
-        function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
+        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3500);
+        async function deleteAccount(id) {
+            if (!confirm("Confirmar deleção do território?")) return;
+            await supabase.from('accounts').delete().eq('id', id);
+            accounts = accounts.filter(a => a.id !== id);
+            if (currentAccountId === id) window.location.reload();
+            renderAccounts();
         }
 
-        async function syncMetricsToDB() {
-            if (!currentAccountId) return;
-            const active = influences.filter(inf => inf.state === 'ativo').length;
-            const gravit = (12 - active) / 12;
-
-            await supabase.from('bsm_metrics').upsert({
-                account_id: currentAccountId,
-                user_id: currentUser.id,
-                gravit: gravit,
-                idt: Math.round(gravit * 100),
-                tes: 80,
-                eet: 95
-            }, { onConflict: 'account_id' });
-        }
-
-        function renderSkeletons(target, count) {
-            document.getElementById(target).innerHTML = Array(count).fill(0).map(() => `
-                <div class="h-24 w-full rounded-3xl skeleton opacity-20"></div>
-            `).join('');
-        }
-
-        async function loadMetrics(accId) {
-            const { data } = await supabase.from('bsm_metrics').select('*').eq('account_id', accId).maybeSingle();
-            if (data) {
-                document.getElementById('metric-tes').innerText = data.tes + '%';
-                document.getElementById('metric-eet').innerText = data.eet + '%';
-            }
-        }
+        // Recuperação de Sessão Persistente
+        window.onload = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) initApp(session.user);
+        };
     </script>
 </body>
 </html>
