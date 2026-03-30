@@ -2,280 +2,446 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSM™ Core | Structural Intelligence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>STG-BSM™ | Core Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=JetBrains+Mono&display=swap');
-        :root { --emerald: #10b981; --rose: #f43f5e; --slate-950: #020617; }
-        body { font-family: 'Inter', sans-serif; background: var(--slate-950); color: white; overflow: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .input-bsm { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 1rem; width: 100%; color: white; outline: none; transition: 0.3s; }
-        .input-bsm:focus { border-color: var(--emerald); }
-        #dashboard { display: none; }
-        .active-view { display: flex !important; }
-        .radar-segment { transition: all 0.3s ease; cursor: pointer; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono&display=swap');
+        :root { --bg: #05070a; --card: #0d1117; --accent: #10b981; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #e6edf3; -webkit-font-smoothing: antialiased; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .btn-primary { background: var(--accent); color: black; font-weight: 900; transition: 0.2s; border-radius: 8px; }
+        .btn-primary:active { transform: scale(0.95); }
+        input, select, textarea { background: #161b22 !important; border: 1px solid #30363d !important; color: white !important; border-radius: 8px; padding: 12px; outline: none; }
+        input:focus { border-color: var(--accent) !important; }
+        .hide { display: none !important; }
+        #app-loader { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; items-center: center; justify-content: center; }
+        .card-account { border-left: 4px solid transparent; transition: 0.3s; }
+        .card-account.active { border-left-color: var(--accent); background: rgba(16, 185, 129, 0.05); }
+        /* Scrollbar Slim */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" class="fixed inset-0 z-[999] flex items-center justify-center bg-[radial-gradient(circle_at_top,_#1e2937_0%,_#020617_100%)]">
-        <div class="w-full max-w-md p-6">
-            <div class="text-center mb-8">
-                <h1 class="text-6xl font-black tracking-tighter">BSM<span class="text-emerald-500">™</span></h1>
-                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em] mt-2">Market Engineering</p>
-            </div>
+    <div id="app-loader">
+        <div class="text-2xl font-black animate-pulse text-emerald-500">BSM™ INITIALIZING...</div>
+    </div>
 
-            <div class="glass p-8 rounded-[2.5rem] shadow-2xl">
-                <div class="flex gap-2 mb-8 bg-black/40 p-1.5 rounded-2xl">
-                    <button type="button" onclick="toggleAuth('login')" id="tab-login" class="flex-1 py-2 text-[10px] font-black rounded-xl bg-white text-black">LOGIN</button>
-                    <button type="button" onclick="toggleAuth('signup')" id="tab-signup" class="flex-1 py-2 text-[10px] font-black rounded-xl text-slate-400">REGISTRAR</button>
+    <div id="auth-screen" class="hide min-h-screen flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111827_0%,_#05070a_100%)]">
+        <div class="w-full max-w-sm">
+            <div class="text-center mb-10">
+                <h1 class="text-5xl font-black tracking-tighter">STG-BSM<span class="text-emerald-500">™</span></h1>
+                <div class="h-1 w-12 bg-emerald-500 mx-auto mt-2"></div>
+            </div>
+            
+            <div class="glass p-8 rounded-3xl shadow-2xl">
+                <div class="flex mb-6 bg-black/40 p-1 rounded-xl">
+                    <button onclick="setAuthMode('login')" id="tab-login" class="flex-1 py-2 text-[10px] font-black rounded-lg bg-white text-black transition-all">ENTRAR</button>
+                    <button onclick="setAuthMode('signup')" id="tab-signup" class="flex-1 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all">REGISTRAR</button>
                 </div>
 
                 <form id="auth-form" class="space-y-4">
-                    <input type="email" id="email" required class="input-bsm" placeholder="E-mail Corporativo">
-                    <input type="password" id="password" required class="input-bsm" placeholder="Senha">
+                    <input type="email" id="auth-email" placeholder="Email" class="w-full" required>
+                    <input type="password" id="auth-password" placeholder="Senha" class="w-full" required>
                     
-                    <div id="signup-fields" class="hidden space-y-4">
-                        <select id="role-select" class="input-bsm">
+                    <div id="signup-extra" class="hide space-y-4">
+                        <select id="auth-role" class="w-full">
                             <option value="S">Sales (S1)</option>
                             <option value="M">Manager (M2)</option>
                             <option value="B">Business (B3)</option>
                         </select>
-                        <p class="text-[9px] text-slate-500 text-center uppercase font-bold">A senha deve terminar em S1, M2 ou B3</p>
                     </div>
 
-                    <div id="auth-feedback" class="hidden text-[10px] font-black text-center p-3 rounded-xl uppercase border"></div>
-
-                    <button type="submit" id="btn-submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg">
-                        ACESSAR TERMINAL
-                    </button>
-
-                    <button type="button" onclick="handleReset()" class="w-full text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-4">
-                        Esqueceu a senha? Recuperar Chave
+                    <button type="submit" id="auth-btn" class="w-full btn-primary py-4 uppercase tracking-widest text-xs">Acessar Terminal</button>
+                    
+                    <button type="button" onclick="resetPassword()" class="w-full text-[9px] font-bold text-slate-500 hover:text-white uppercase tracking-widest mt-2">
+                        Recuperar Chave de Acesso
                     </button>
                 </form>
+                <div id="auth-msg" class="mt-4 text-[10px] text-center font-bold uppercase hidden"></div>
             </div>
         </div>
     </div>
 
-    <div id="dashboard" class="h-screen flex-col">
-        <nav class="h-20 border-b border-white/5 px-10 flex items-center justify-between glass">
-            <div class="flex items-center gap-6">
-                <span class="text-2xl font-black tracking-tighter">BSM™</span>
-                <span id="badge-nivel" class="px-3 py-1 bg-emerald-500 text-black text-[10px] font-black rounded-md">--</span>
+    <div id="main-dashboard" class="hide flex flex-col h-screen">
+        <header class="h-16 border-b border-white/5 flex items-center justify-between px-6 glass shrink-0">
+            <div class="flex items-center gap-4">
+                <span class="font-black tracking-tighter text-xl">BSM™</span>
+                <span id="user-role-tag" class="text-[9px] font-black bg-emerald-500 text-black px-2 py-0.5 rounded">S1</span>
+                <span id="save-indicator" class="text-[9px] text-slate-500 font-bold uppercase hidden">● Sincronizado</span>
             </div>
-            <button onclick="handleLogout()" class="text-slate-500 hover:text-rose-500 font-black text-[10px] uppercase">Sair do Sistema</button>
-        </nav>
-        
-        <main class="flex-1 flex overflow-hidden">
-            <aside class="w-80 border-r border-white/5 p-6 flex flex-col bg-black/20">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Territórios</h3>
-                    <button onclick="addTerritory()" class="text-emerald-500 font-bold">+</button>
+            
+            <div id="ia-bar" class="hidden md:flex flex-1 max-w-md mx-10 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 items-center gap-3">
+                <span class="text-[9px] font-black text-emerald-500">IA_INSIGHT:</span>
+                <marquee id="ia-text" class="text-[10px] font-medium text-emerald-200">Analizando território... aguardando dados operacionais.</marquee>
+            </div>
+
+            <button onclick="logout()" class="text-slate-500 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </header>
+
+        <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+            
+            <aside class="w-full md:w-80 border-r border-white/5 flex flex-col glass overflow-hidden">
+                <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
+                    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Territórios</h2>
+                    <button onclick="showAccountModal()" class="w-6 h-6 btn-primary flex items-center justify-center text-lg">+</button>
                 </div>
-                <div id="acc-list" class="space-y-2 overflow-y-auto"></div>
+                <div id="accounts-container" class="flex-1 overflow-y-auto p-3 space-y-2">
+                    </div>
             </aside>
 
-            <section class="flex-1 flex flex-col items-center justify-center p-10 bg-[radial-gradient(circle_at_center,_#111827_0%,_#020617_100%)]">
-                <div class="relative">
-                    <svg id="radar-svg" width="500" height="500" viewBox="0 0 500 500"></svg>
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span id="gravit-val" class="text-6xl font-black">0%</span>
-                        <span class="text-[10px] text-emerald-500 font-black tracking-widest">GRAVIT™</span>
+            <main class="flex-1 flex flex-col bg-[radial-gradient(circle_at_center,_#0d1117_0%,_#05070a_100%)] overflow-y-auto">
+                <div id="metrics-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
+                    <div class="glass p-4 rounded-2xl">
+                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">Gravit™ Force</div>
+                        <div id="m-gravit" class="text-3xl font-black text-white">0%</div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl">
+                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">IDT™ Index</div>
+                        <div id="m-idt" class="text-3xl font-black text-emerald-500">0.0</div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl">
+                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">EET™ Status</div>
+                        <div id="m-eet" class="text-3xl font-black text-white">N/A</div>
+                    </div>
+                    <div class="glass p-4 rounded-2xl">
+                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">TES™ Volume</div>
+                        <div id="m-tes" class="text-lg font-black text-white mono">R$ 0,00</div>
                     </div>
                 </div>
-            </section>
 
-            <aside class="w-96 border-l border-white/5 p-8 flex flex-col">
-                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Ações Táticas</h3>
-                <div id="action-list" class="flex-1 space-y-4 overflow-y-auto mb-6"></div>
-                <div class="relative">
-                    <textarea id="action-in" class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white" placeholder="Nova ação..."></textarea>
-                    <button onclick="submitAction()" class="absolute bottom-4 right-4 bg-emerald-600 p-2 rounded-xl">✓</button>
+                <div class="flex-1 flex items-center justify-center p-4 min-h-[400px]">
+                    <div class="relative w-full max-w-[450px] aspect-square">
+                        <svg id="radar-svg" viewBox="0 0 500 500" class="w-full h-full drop-shadow-[0_0_30px_rgba(16,185,129,0.1)]"></svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <div class="text-center">
+                                <div id="center-g-val" class="text-6xl font-black text-white leading-none">0%</div>
+                                <div class="text-[9px] font-black text-emerald-500 tracking-[0.3em] uppercase mt-2">Active Orbit</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="w-full md:w-96 border-l border-white/5 flex flex-col glass overflow-hidden">
+                <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
+                    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ações Táticas</h2>
+                    <span class="text-[9px] font-black text-emerald-500">FEEDBACK ATIVO</span>
+                </div>
+                
+                <div id="actions-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    </div>
+
+                <div class="p-4 bg-black/40 border-t border-white/5">
+                    <div class="flex gap-2">
+                        <input type="text" id="new-action-desc" placeholder="Descreva a ação..." class="flex-1 text-xs">
+                        <button onclick="createAction()" class="btn-primary px-4 py-2 uppercase text-[10px]">Add</button>
+                    </div>
                 </div>
             </aside>
-        </main>
+        </div>
+    </div>
+
+    <div id="account-modal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-6 hide">
+        <div class="glass w-full max-w-md rounded-[2.5rem] p-8">
+            <h3 class="text-2xl font-black mb-6 uppercase italic tracking-tighter">Novo Território</h3>
+            <div class="space-y-4">
+                <input type="text" id="acc-name" placeholder="Nome do Cliente/Região" class="w-full">
+                <input type="number" id="acc-value" placeholder="Valor Estimado (R$)" class="w-full">
+                <select id="acc-status" class="w-full">
+                    <option value="Lead">Lead</option>
+                    <option value="Em Negociação">Em Negociação</option>
+                    <option value="Fechado">Fechado</option>
+                    <option value="Perdido">Perdido</option>
+                </select>
+                <div class="flex gap-2 pt-4">
+                    <button onclick="closeAccountModal()" class="flex-1 bg-white/5 py-3 rounded-xl font-bold uppercase text-[10px]">Cancelar</button>
+                    <button onclick="saveAccount()" class="flex-1 btn-primary py-3 rounded-xl font-bold uppercase text-[10px]">Criar Território</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 1. AUDITORIA DE CONEXÃO: Instanciação Global
-        const SUPABASE_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const SUPA_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
+        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
+        const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-        let currentAuthMode = 'login';
-        let activeAcc = null;
-        let activeInfluences = [];
+        let S = { user: null, role: 'S', accounts: [], influences: [], actions: [], activeAccId: null, authMode: 'login' };
 
-        // 2. RESOLUÇÃO DE LOGIN E REGISTRO
-        function toggleAuth(mode) {
-            currentAuthMode = mode;
-            document.getElementById('tab-login').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode === 'login' ? 'bg-white text-black' : 'text-slate-400'}`;
-            document.getElementById('tab-signup').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode === 'signup' ? 'bg-white text-black' : 'text-slate-400'}`;
-            document.getElementById('signup-fields').classList.toggle('hidden', mode === 'login');
-            document.getElementById('btn-submit').innerText = mode === 'login' ? 'ACESSAR TERMINAL' : 'FINALIZAR REGISTRO';
+        const VECTORS = [
+            {id:'B1', n:'Energia'}, {id:'B2', n:'Tempo'}, {id:'B3', n:'Dinheiro'}, {id:'B4', n:'Eficiência'},
+            {id:'S1', n:'Status'}, {id:'S2', n:'Pertença'}, {id:'S3', n:'Autoridade'}, {id:'S4', n:'Escassez'},
+            {id:'M1', n:'Prova'}, {id:'M2', n:'Comparação'}, {id:'M3', n:'Intuição'}, {id:'M4', n:'Valores'}
+        ];
+
+        /* --- MOTOR DE AUTENTICAÇÃO --- */
+        function setAuthMode(m) {
+            S.authMode = m;
+            document.getElementById('tab-login').className = `flex-1 py-2 text-[10px] font-black rounded-lg ${m==='login'?'bg-white text-black':'text-slate-400'}`;
+            document.getElementById('tab-signup').className = `flex-1 py-2 text-[10px] font-black rounded-lg ${m==='signup'?'bg-white text-black':'text-slate-400'}`;
+            document.getElementById('signup-extra').classList.toggle('hide', m==='login');
+            document.getElementById('auth-btn').innerText = m==='login' ? 'Acessar Terminal' : 'Criar Conta BSM';
         }
 
         document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const feedback = document.getElementById('auth-feedback');
-            
-            // Validação de Sufixo (Regra de Negócio)
-            const suffix = password.slice(-2);
-            const valid = ['S1', 'M2', 'B3'].includes(suffix);
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const role = document.getElementById('auth-role').value;
+            const msg = document.getElementById('auth-msg');
 
-            if(!valid) {
-                showFeedback("Erro: A senha precisa terminar em S1, M2 ou B3.", "rose");
-                return;
-            }
+            msg.className = "mt-4 text-[10px] text-center font-bold uppercase text-emerald-500 block";
+            msg.innerText = "Processando...";
 
-            if(currentAuthMode === 'signup') {
-                const role = document.getElementById('role-select').value;
-                if(role !== suffix.charAt(0)) {
-                    showFeedback("Erro: Sufixo da senha não condiz com o nível.", "rose");
-                    return;
+            try {
+                if(S.authMode === 'signup') {
+                    const { data, error } = await sb.auth.signUp({ 
+                        email, password, 
+                        options: { data: { role: role, suffix: password.slice(-2) } }
+                    });
+                    if(error) throw error;
+                    msg.innerText = "Sucesso! Verifique seu email para confirmar.";
+                } else {
+                    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                    if(error) throw error;
+                    location.reload();
                 }
-
-                const { data, error } = await _supabase.auth.signUp({
-                    email, password, options: { data: { role: role, suffix: suffix } }
-                });
-
-                if(error) showFeedback(error.message, "rose");
-                else showFeedback("Sucesso! Verifique seu e-mail para confirmar o acesso.", "emerald");
-            } else {
-                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if(error) showFeedback("Erro: Credenciais inválidas ou e-mail não confirmado.", "rose");
-                else handleEntry(data.user, suffix);
+            } catch (err) {
+                msg.innerText = err.message;
+                msg.className = "mt-4 text-[10px] text-center font-bold uppercase text-rose-500 block";
             }
         };
 
-        // 3. RECUPERAÇÃO DE SENHA (FUNCIONALIDADE INTEGRADA)
-        async function handleReset() {
-            const email = document.getElementById('email').value;
-            if(!email) { showFeedback("Digite seu e-mail primeiro.", "rose"); return; }
-            
-            const { error } = await _supabase.auth.resetPasswordForEmail(email);
-            if(error) showFeedback(error.message, "rose");
-            else showFeedback("Link de recuperação enviado para " + email, "emerald");
+        async function logout() { await sb.auth.signOut(); location.reload(); }
+
+        async function resetPassword() {
+            const email = document.getElementById('auth-email').value;
+            if(!email) return alert("Digite o email.");
+            await sb.auth.resetPasswordForEmail(email);
+            alert("Email de recuperação enviado.");
         }
 
-        function showFeedback(txt, color) {
-            const f = document.getElementById('auth-feedback');
-            f.innerText = txt;
-            f.className = `text-[10px] font-black text-center p-3 rounded-xl uppercase border border-${color}-500/30 bg-${color}-500/10 text-${color}-500`;
-            f.classList.remove('hidden');
-        }
-
-        // 4. INICIALIZAÇÃO DO APP
-        async function handleEntry(user, suffix) {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('dashboard').classList.add('active-view');
-            document.getElementById('badge-nivel').innerText = suffix;
-            loadAccounts();
-            drawRadar();
-        }
-
+        /* --- MOTOR DE DADOS (CRUD ACCOUNTS) --- */
         async function loadAccounts() {
-            const { data } = await _supabase.from('accounts').select('*');
-            if(data) {
-                const list = document.getElementById('acc-list');
-                list.innerHTML = data.map(a => `
-                    <div onclick="selectAcc('${a.id}')" class="p-4 glass rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
-                        <div class="text-[11px] font-black">${a.name}</div>
-                        <div class="text-[9px] text-slate-500">R$ ${a.valor}</div>
+            const { data } = await sb.from('accounts').select('*').order('created_at', {ascending: false});
+            S.accounts = data || [];
+            renderAccounts();
+            generateIAInsights();
+        }
+
+        function renderAccounts() {
+            const container = document.getElementById('accounts-container');
+            container.innerHTML = S.accounts.map(acc => `
+                <div onclick="selectAccount('${acc.id}')" class="card-account glass p-4 rounded-xl cursor-pointer hover:bg-white/5 ${S.activeAccId === acc.id ? 'active' : ''}">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[11px] font-black uppercase text-white truncate w-32">${acc.name}</span>
+                        <button onclick="deleteAccount(event, '${acc.id}')" class="text-slate-600 hover:text-rose-500 text-[10px]">✕</button>
                     </div>
-                `).join('');
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="text-[9px] mono text-slate-500">R$ ${Number(acc.valor).toLocaleString()}</span>
+                        <span class="text-[8px] font-black bg-white/5 px-2 py-0.5 rounded text-slate-400 uppercase">${acc.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function selectAccount(id) {
+            S.activeAccId = id;
+            renderAccounts();
+            await loadInfluences();
+            await loadActions();
+            processMetrics();
+        }
+
+        async function saveAccount() {
+            const name = document.getElementById('acc-name').value;
+            const valor = document.getElementById('acc-value').value;
+            const status = document.getElementById('acc-status').value;
+
+            if(!name) return;
+            const { error } = await sb.from('accounts').insert({
+                name, valor, status, user_id: S.user.id
+            });
+            
+            if(!error) {
+                closeAccountModal();
+                loadAccounts();
             }
         }
 
-        async function selectAcc(id) {
-            activeAcc = id;
-            const { data } = await _supabase.from('influences').select('*').eq('account_id', id);
-            activeInfluences = data || [];
-            updateRadarVisuals();
-            loadActions();
+        async function deleteAccount(e, id) {
+            e.stopPropagation();
+            if(!confirm("Deseja excluir este território?")) return;
+            await sb.from('accounts').delete().eq('id', id);
+            if(S.activeAccId === id) S.activeAccId = null;
+            loadAccounts();
         }
 
-        // 5. ENGINE DO RADAR (SVG DINÂMICO)
+        /* --- MOTOR DE INFLUÊNCIAS (RADAR) --- */
+        async function loadInfluences() {
+            const { data } = await sb.from('influences').select('*').eq('account_id', S.activeAccId);
+            S.influences = data || [];
+            drawRadar();
+        }
+
         function drawRadar() {
             const svg = document.getElementById('radar-svg');
-            const center = 250, r = 200, inner = 80;
-            const codes = ['B1','B2','B3','B4','S1','S2','S3','S4','M1','M2','M3','M4'];
+            svg.innerHTML = '';
+            const center = 250, r = 210, inner = 90;
 
-            codes.forEach((code, i) => {
+            VECTORS.forEach((v, i) => {
                 const start = (i * 30 - 90) * (Math.PI / 180);
                 const end = ((i + 1) * 30 - 90) * (Math.PI / 180);
                 const d = `M ${center + r * Math.cos(start)} ${center + r * Math.sin(start)} A ${r} ${r} 0 0 1 ${center + r * Math.cos(end)} ${center + r * Math.sin(end)} L ${center + inner * Math.cos(end)} ${center + inner * Math.sin(end)} A ${inner} ${inner} 0 0 0 ${center + inner * Math.cos(start)} ${center + inner * Math.sin(start)} Z`;
                 
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("d", d);
-                path.setAttribute("id", "path-" + code);
-                path.setAttribute("class", "radar-segment fill-white/5 stroke-white/10");
-                path.onclick = () => toggleInfluence(code);
+                
+                const inf = S.influences.find(inf => inf.influence_code === v.id);
+                let fill = 'rgba(255,255,255,0.03)';
+                let stroke = 'rgba(255,255,255,0.1)';
+
+                if(inf?.state === 'ativo') { fill = 'rgba(244,63,94,0.3)'; stroke = '#f43f5e'; }
+                else if(inf?.state === 'removido') { fill = 'rgba(16,185,129,0.3)'; stroke = '#10b981'; }
+
+                path.setAttribute("fill", fill);
+                path.setAttribute("stroke", stroke);
+                path.setAttribute("stroke-width", "1.5");
+                path.setAttribute("class", "radar-segment");
+                path.onclick = () => toggleInfluence(v.id);
                 svg.appendChild(path);
+
+                // Labels ID
+                const mid = (i * 30 - 75) * (Math.PI / 180);
+                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", center + (r + 20) * Math.cos(mid));
+                txt.setAttribute("y", center + (r + 20) * Math.sin(mid));
+                txt.setAttribute("text-anchor", "middle");
+                txt.setAttribute("class", "fill-slate-500 text-[10px] font-black mono");
+                txt.textContent = v.id;
+                svg.appendChild(txt);
             });
+            updateGravitUI();
         }
 
         async function toggleInfluence(code) {
-            if(!activeAcc) return;
-            const exist = activeInfluences.find(i => i.influence_code === code);
-            let state = 'neutro';
-            if(!exist || exist.state === 'neutro') state = 'ativo';
-            else if(exist.state === 'ativo') state = 'removido';
+            if(!S.activeAccId) return;
+            const exist = S.influences.find(i => i.influence_code === code);
+            let next = 'ativo';
+            if(exist?.state === 'ativo') next = 'removido';
+            else if(exist?.state === 'removido') next = 'neutro';
 
-            await _supabase.from('influences').upsert({
-                account_id: activeAcc, influence_code: code, state: state, user_id: (await _supabase.auth.getUser()).data.user.id
+            await sb.from('influences').upsert({
+                account_id: S.activeAccId, influence_code: code, state: next, user_id: S.user.id
             }, { onConflict: 'account_id,influence_code' });
 
-            selectAcc(activeAcc);
+            await loadInfluences();
+            processMetrics();
         }
 
-        function updateRadarVisuals() {
-            const codes = ['B1','B2','B3','B4','S1','S2','S3','S4','M1','M2','M3','M4'];
-            let ativos = 0;
-            codes.forEach(c => {
-                const el = document.getElementById("path-" + c);
-                const inf = activeInfluences.find(i => i.influence_code === c);
-                if(inf?.state === 'ativo') { el.style.fill = 'rgba(244,63,94,0.4)'; ativos++; }
-                else if(inf?.state === 'removido') el.style.fill = 'rgba(16,185,129,0.4)';
-                else el.style.fill = 'rgba(255,255,255,0.05)';
-            });
-            document.getElementById('gravit-val').innerText = Math.round(((12-ativos)/12)*100) + "%";
-        }
-
-        async function addTerritory() {
-            const n = prompt("Nome do território:");
-            const v = prompt("Valor:");
-            if(n) {
-                const user = (await _supabase.auth.getUser()).data.user;
-                await _supabase.from('accounts').insert({ name: n, valor: v, user_id: user.id });
-                loadAccounts();
-            }
-        }
-
+        /* --- MOTOR DE AÇÕES --- */
         async function loadActions() {
-            const { data } = await _supabase.from('actions').select('*').eq('account_id', activeAcc);
-            document.getElementById('action-list').innerHTML = (data || []).map(a => `<div class="p-3 glass rounded-xl text-[10px]">${a.description}</div>`).join('');
+            const { data } = await sb.from('actions').select('*').eq('account_id', S.activeAccId).order('created_at', {ascending: false});
+            S.actions = data || [];
+            const container = document.getElementById('actions-container');
+            container.innerHTML = S.actions.map(a => `
+                <div class="glass p-4 rounded-2xl animate-fade-in relative group">
+                    <button onclick="deleteAction('${a.id}')" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-500 transition-all">✕</button>
+                    <p class="text-xs text-slate-300 font-medium">${a.description}</p>
+                    <div class="mt-2 text-[8px] font-black text-slate-600 uppercase mono">${new Date(a.created_at).toLocaleString()}</div>
+                </div>
+            `).join('');
         }
 
-        async function submitAction() {
-            const val = document.getElementById('action-in').value;
-            if(!val || !activeAcc) return;
-            await _supabase.from('actions').insert({ account_id: activeAcc, description: val, user_id: (await _supabase.auth.getUser()).data.user.id });
-            document.getElementById('action-in').value = '';
+        async function createAction() {
+            const desc = document.getElementById('new-action-desc').value;
+            if(!desc || !S.activeAccId) return;
+            await sb.from('actions').insert({
+                account_id: S.activeAccId, description: desc, user_id: S.user.id
+            });
+            document.getElementById('new-action-desc').value = '';
             loadActions();
         }
 
-        async function handleLogout() { await _supabase.auth.signOut(); window.location.reload(); }
+        async function deleteAction(id) {
+            await sb.from('actions').delete().eq('id', id);
+            loadActions();
+        }
 
-        // AUTO-LOGIN (PERSISTÊNCIA)
+        /* --- MÉTRICAS E IA --- */
+        function processMetrics() {
+            const acc = S.accounts.find(a => a.id === S.activeAccId);
+            const ativos = S.influences.filter(i => i.state === 'ativo').length;
+            const g = Math.round(((12 - ativos) / 12) * 100);
+
+            document.getElementById('m-tes').innerText = `R$ ${Number(acc?.valor || 0).toLocaleString()}`;
+            document.getElementById('m-gravit').innerText = g + '%';
+            document.getElementById('center-g-val').innerText = g + '%';
+            document.getElementById('m-idt').innerText = (ativos * 0.8).toFixed(1);
+            document.getElementById('m-eet').innerText = acc?.status || 'N/A';
+            
+            generateIAInsights();
+        }
+
+        function updateGravitUI() {
+            const ativos = S.influences.filter(i => i.state === 'ativo').length;
+            const g = Math.round(((12 - ativos) / 12) * 100);
+            document.getElementById('center-g-val').innerText = g + '%';
+        }
+
+        function generateIAInsights() {
+            const bar = document.getElementById('ia-bar');
+            const text = document.getElementById('ia-text');
+            bar.classList.remove('hidden');
+
+            if(S.accounts.length === 0) {
+                text.innerText = "SISTEMA OCIOSO: Adicione um território para iniciar o mapeamento estrutural.";
+                return;
+            }
+
+            if(!S.activeAccId) {
+                text.innerText = "SISTEMA PRONTO: Selecione um território para análise de força gravitacional.";
+                return;
+            }
+
+            const ativos = S.influences.filter(i => i.state === 'ativo').length;
+            if(ativos > 8) text.innerText = "ALERTA CRÍTICO: Bloqueio estrutural excessivo. Remova os vetores B1 e B3 para destravar a negociação.";
+            else if(ativos < 3) text.innerText = "OPORTUNIDADE ALTA: Baixa resistência detectada. Avance com o protocolo de fechamento IMEDIATAMENTE.";
+            else text.innerText = "ANÁLISE DE CAMPO: Território em fase de maturação. Monitore o vetor M1 para validação de prova.";
+        }
+
+        /* --- MODAIS E UI --- */
+        function showAccountModal() { document.getElementById('account-modal').classList.remove('hide'); }
+        function closeAccountModal() { document.getElementById('account-modal').classList.add('hide'); }
+
+        /* --- INICIALIZAÇÃO CORE --- */
         window.onload = async () => {
-            const { data: { session } } = await _supabase.auth.getSession();
-            if(session) handleEntry(session.user, session.user.user_metadata.suffix || 'S1');
+            const { data: { session } } = await sb.auth.getSession();
+            document.getElementById('app-loader').classList.add('hide');
+
+            if (session) {
+                S.user = session.user;
+                S.role = session.user.user_metadata?.role || 'S';
+                document.getElementById('auth-screen').classList.add('hide');
+                document.getElementById('main-dashboard').classList.add('active-view');
+                document.getElementById('user-role-tag').innerText = S.role + '1';
+                loadAccounts();
+                
+                // Auto-save feedback visual
+                setInterval(() => {
+                    document.getElementById('save-indicator').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('save-indicator').classList.add('hidden'), 2000);
+                }, 10000);
+            } else {
+                document.getElementById('auth-screen').classList.remove('hide');
+            }
         };
     </script>
 </body>
