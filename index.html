@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSM™ Core | Business Structural Market System</title>
+    <title>BSM™ Core | Intelligence System</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,281 +12,317 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
 
         :root {
-            --bsm-emerald: #10b981;
-            --bsm-rose: #f43f5e;
-            --bsm-amber: #f59e0b;
-            --bsm-slate-900: #0f172a;
-            --bsm-slate-950: #020617;
+            --apple-bg: #000000;
+            --apple-card: #1c1c1e;
+            --bsm-emerald: #34c759;
+            --bsm-gold: #ff9f0a;
+            --bsm-blue: #0a84ff;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bsm-slate-950);
-            color: #f8fafc;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--apple-bg);
+            color: #ffffff;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .mono { font-family: 'JetBrains+Mono', monospace; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Estética de Alta Engenharia (Apple/Linear) */
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        /* Glassmorphism & UI Apple */
+        .glass {
+            background: rgba(28, 28, 30, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-bsm {
+            background: #2c2c2e;
+            border: 1px solid #3a3a3c;
+            border-radius: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-bsm:focus {
+            border-color: var(--bsm-blue);
+            box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.2);
+            outline: none;
         }
 
         .radar-segment {
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 0.4s ease;
             cursor: pointer;
-            stroke-width: 0.5px;
         }
 
-        .radar-segment:hover {
-            filter: brightness(1.5) drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
-            stroke-width: 1.5px;
+        #app-interface { display: none; }
+        .hidden { display: none !important; }
+        
+        .role-badge {
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
         }
 
-        /* Gravit Animation */
-        .gravit-ring {
-            transition: stroke-dashoffset 1.2s cubic-bezier(0.65, 0, 0.35, 1);
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #1e2937; border-radius: 10px; }
-
-        #dashboard-ui { display: none; opacity: 0; transition: opacity 0.5s ease; }
-        .fade-in { opacity: 1 !important; }
-
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        .analyzing { animation: pulse-soft 2s infinite; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide { animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
     </style>
 </head>
-<body class="selection:bg-emerald-500/30">
+<body>
 
-    <div id="auth-ui" class="fixed inset-0 z-[1000] flex items-center justify-center bg-[radial-gradient(circle_at_top,_#1e2937_0%,_#020617_100%)]">
-        <div class="w-full max-w-sm p-8">
-            <div class="text-center mb-10">
-                <h1 class="text-5xl font-black tracking-tighter text-white mb-2">BSM<span class="text-emerald-500">™</span></h1>
-                <p class="text-slate-500 text-xs font-bold uppercase tracking-[0.3em]">Market Engineering Core</p>
+    <div id="auth-screen" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
+        <div class="w-full max-w-md p-8 animate-slide">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-black tracking-tighter mb-2">BSM<span class="text-emerald-500">™</span></h1>
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.4em]">Structural Intelligence</p>
             </div>
-            
-            <div class="glass-panel p-8 rounded-[2.5rem] shadow-2xl">
-                <form id="login-form" class="space-y-5">
+
+            <div class="glass p-10 rounded-[2.5rem] shadow-2xl">
+                <div class="flex gap-4 mb-8 bg-black/40 p-1 rounded-2xl">
+                    <button onclick="toggleAuthMode('login')" id="tab-login" class="flex-1 py-2 text-xs font-black rounded-xl bg-white text-black transition-all">LOGIN</button>
+                    <button onclick="toggleAuthMode('signup')" id="tab-signup" class="flex-1 py-2 text-xs font-black rounded-xl text-slate-400 transition-all">REGISTRAR</button>
+                </div>
+
+                <form id="auth-form" class="space-y-5">
                     <div class="space-y-1">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Terminal ID (Email)</label>
-                        <input type="email" id="email" required class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all placeholder:text-slate-700" placeholder="engenheiro@bsm.com">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Terminal ID</label>
+                        <input type="email" id="email" required class="w-full input-bsm px-5 py-4 text-sm text-white" placeholder="email@bsm.com">
                     </div>
+
                     <div class="space-y-1">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Access Key</label>
-                        <input type="password" id="password" required class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all placeholder:text-slate-700" placeholder="••••••••">
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Access Code (Nível + Sufixo)</label>
+                        <input type="password" id="password" required class="w-full input-bsm px-5 py-4 text-sm text-white" placeholder="Senha + S1/M2/B3">
                     </div>
-                    <div id="login-error" class="hidden text-rose-500 text-[10px] font-bold text-center uppercase tracking-tighter py-2">Credenciais Inválidas ou Erro de Conexão</div>
-                    <button type="submit" id="btn-login" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all active:scale-[0.97] shadow-lg shadow-emerald-900/20">
-                        INICIALIZAR PROTOCOLO
+
+                    <div id="signup-extra" class="hidden space-y-5">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Nível de Acesso</label>
+                            <select id="role-select" class="w-full input-bsm px-5 py-4 text-sm text-white appearance-none">
+                                <option value="S">Sales (S1)</option>
+                                <option value="M">Manager (M2)</option>
+                                <option value="B">Business (B3)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="auth-error" class="hidden text-rose-500 text-[10px] font-black text-center uppercase tracking-tighter bg-rose-500/10 py-3 rounded-xl border border-rose-500/20"></div>
+
+                    <button type="submit" id="btn-auth" class="w-full bg-white text-black font-black py-4 rounded-2xl transition-all active:scale-95 shadow-xl">
+                        AUTENTICAR SISTEMA
+                    </button>
+
+                    <button type="button" onclick="handleForgotPassword()" class="w-full text-[10px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest">
+                        Esqueceu a chave de acesso?
                     </button>
                 </form>
             </div>
         </div>
     </div>
 
-    <div id="dashboard-ui" class="flex flex-col h-screen">
+    <div id="app-interface" class="flex flex-col h-screen overflow-hidden">
         
-        <nav class="h-16 border-b border-slate-800 px-8 flex items-center justify-between bg-slate-950/50 backdrop-blur-md">
-            <div class="flex items-center gap-6">
+        <nav class="h-20 border-b border-white/5 px-10 flex items-center justify-between glass sticky top-0 z-50">
+            <div class="flex items-center gap-8">
                 <span class="text-2xl font-black tracking-tighter">BSM™</span>
-                <div class="h-4 w-px bg-slate-800"></div>
-                <div class="flex flex-col">
-                    <span id="nav-acc-name" class="text-xs font-black text-white uppercase tracking-tight">Selecione um Território</span>
-                    <span id="nav-acc-status" class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Aguardando Conexão</span>
+                <div class="flex items-center gap-3">
+                    <span id="user-role-display" class="role-badge bg-emerald-500 text-black">S1</span>
+                    <span id="current-user-email" class="text-[11px] font-bold text-slate-400 mono">---</span>
                 </div>
             </div>
 
-            <div class="flex items-center gap-8">
-                <div class="flex items-center gap-4 bg-slate-900/50 px-4 py-1.5 rounded-full border border-slate-800">
-                    <div class="relative w-8 h-8">
-                        <svg class="w-full h-full" viewBox="0 0 36 36">
-                            <circle cx="18" cy="18" r="16" fill="none" class="stroke-slate-800" stroke-width="3"></circle>
-                            <path id="global-gravit-path" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" class="gravit-ring stroke-emerald-500" stroke-width="3" stroke-dasharray="0, 100"></path>
-                        </svg>
-                        <div id="global-gravit-val" class="absolute inset-0 flex items-center justify-center text-[9px] font-black">0%</div>
-                    </div>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Gravit™ Force</span>
+            <div class="flex items-center gap-6">
+                <div id="b-controls" class="hidden flex items-center gap-4 border-r border-white/10 pr-6">
+                    <button class="text-[10px] font-black text-slate-400 hover:text-white">GLOBAL P&L</button>
+                    <button class="text-[10px] font-black text-slate-400 hover:text-white">USERS MASTER</button>
                 </div>
-
-                <button onclick="openModal('new-account')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-5 py-2.5 rounded-full transition-all active:scale-95 shadow-lg shadow-emerald-900/10">
-                    NOVA CONTA
-                </button>
-                <button onclick="handleLogout()" class="text-slate-500 hover:text-rose-500 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                
+                <button onclick="handleLogout()" class="p-3 bg-white/5 hover:bg-rose-500/20 rounded-full transition-all group">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 </button>
             </div>
         </nav>
 
         <main class="flex-1 flex overflow-hidden">
-            
-            <aside class="w-80 border-r border-slate-800 flex flex-col bg-slate-950/30">
-                <div class="p-6">
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Territórios Operacionais</h3>
-                    <div id="accounts-list" class="space-y-3 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
+            <aside class="w-80 border-r border-white/5 flex flex-col p-8 overflow-y-auto">
+                <div id="m-section" class="hidden mb-10 animate-slide">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Gestão de Time (M2)</h3>
+                    <div class="space-y-2">
+                        <div class="p-4 bg-blue-500/5 border border-blue-500/20 rounded-2xl">
+                            <span class="text-[9px] font-black text-blue-400 block mb-1">Cota do Território</span>
+                            <span class="text-sm font-black">R$ 450.000,00</span>
                         </div>
+                    </div>
                 </div>
+
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Territórios</h3>
+                    <button onclick="openModal('new-account')" class="text-emerald-500 hover:scale-110 transition-transform">+</button>
+                </div>
+                <div id="accounts-list" class="space-y-3"></div>
             </aside>
 
-            <section class="flex-1 relative flex items-center justify-center p-12 bg-[radial-gradient(circle_at_center,_#111827_0%,_transparent_70%)]">
-                
-                <div id="radar-empty" class="text-center max-w-xs">
-                    <div class="w-20 h-20 bg-slate-900 border border-slate-800 rounded-[2rem] flex items-center justify-center mx-auto mb-6 opacity-30">
-                        <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <section class="flex-1 flex flex-col items-center justify-center p-10 bg-[radial-gradient(circle_at_center,_#1c1c1e_0%,_#000000_100%)]">
+                <div id="radar-ui" class="relative group">
+                    <svg id="bsm-radar-svg" width="550" height="550" viewBox="0 0 550 550"></svg>
+                    
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div class="w-[160px] h-[160px] rounded-full bg-black border border-white/10 flex flex-col items-center justify-center shadow-[0_0_50px_rgba(0,0,0,1)]">
+                            <span id="gravit-val" class="text-5xl font-black leading-none">0%</span>
+                            <span class="text-[9px] font-black text-slate-600 uppercase mt-2 tracking-widest">GRAVIT™</span>
+                        </div>
                     </div>
-                    <p class="text-slate-500 text-sm font-medium leading-relaxed">Nenhum território selecionado para análise de influência tática.</p>
                 </div>
 
-                <div id="radar-ui" class="hidden w-full h-full flex flex-col items-center justify-center fade-in">
-                    <div class="absolute top-12 left-12 grid grid-cols-2 gap-4">
-                        <div class="glass-panel p-4 rounded-3xl min-w-[120px]">
-                            <span class="text-[9px] font-black text-slate-500 uppercase block mb-1">IDT™ Index</span>
-                            <span id="stat-idt" class="text-xl font-black text-white">0%</span>
+                <div class="mt-12 w-full max-w-2xl glass p-8 rounded-[2.5rem] border-emerald-500/20 animate-slide">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[10px] font-black uppercase tracking-[0.2em]">Diagnóstico Tático BSM</span>
                         </div>
-                        <div class="glass-panel p-4 rounded-3xl min-w-[120px]">
-                            <span class="text-[9px] font-black text-slate-500 uppercase block mb-1">Entropy</span>
-                            <span id="stat-entropy" class="text-xl font-black text-rose-500">MAX</span>
-                        </div>
+                        <span id="radar-status-label" class="text-[9px] font-black px-3 py-1 bg-white/5 rounded-full">---</span>
                     </div>
-
-                    <div class="relative group">
-                        <svg id="bsm-radar-svg" width="500" height="500" viewBox="0 0 500 500" class="drop-shadow-[0_0_60px_rgba(16,185,129,0.05)]"></svg>
-                        
-                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div class="w-[140px] h-[140px] rounded-full bg-slate-950 border border-slate-800 flex flex-col items-center justify-center text-center shadow-2xl">
-                                <span id="radar-prob-val" class="text-4xl font-black text-white leading-none">0%</span>
-                                <span class="text-[9px] font-black text-slate-600 uppercase mt-2 tracking-widest">Probability</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-12 w-full max-w-xl glass-panel p-6 rounded-[2rem] border-emerald-500/10">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">BSM™ Intelligence Insight</span>
-                        </div>
-                        <p id="insight-box" class="text-slate-400 text-sm italic font-medium">Aguardando definição de vetores...</p>
-                    </div>
+                    <p id="insight-text" class="text-slate-400 text-sm italic leading-relaxed">Selecione um território para iniciar a decodificação estrutural.</p>
                 </div>
             </section>
 
-            <aside class="w-96 border-l border-slate-800 flex flex-col bg-slate-950/30 p-8">
-                <div class="flex flex-col h-full">
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Plano de Execução Tática</h3>
-                    
-                    <div id="actions-list" class="flex-1 overflow-y-auto space-y-4 pr-2 mb-6">
-                        </div>
-
-                    <div class="relative">
-                        <textarea id="action-input" rows="2" placeholder="Nova diretriz estratégica..." class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none"></textarea>
-                        <button onclick="submitAction()" class="absolute bottom-3 right-3 p-2 bg-emerald-600 rounded-xl text-white hover:bg-emerald-500 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
-                        </button>
-                    </div>
+            <aside class="w-96 border-l border-white/5 flex flex-col p-8">
+                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6">Execução Tática</h3>
+                <div id="actions-list" class="flex-1 space-y-4 overflow-y-auto mb-6"></div>
+                
+                <div class="relative">
+                    <textarea id="action-input" rows="3" placeholder="Definir próxima ação..." class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all"></textarea>
+                    <button onclick="submitAction()" class="absolute bottom-4 right-4 bg-emerald-600 p-2 rounded-xl text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                 </div>
             </aside>
         </main>
     </div>
 
-    <div id="modal-container" class="fixed inset-0 z-[2000] hidden flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
-        <div class="bg-slate-900 w-full max-w-lg rounded-[2.5rem] border border-slate-800 p-10 relative shadow-2xl">
-            <h2 id="modal-title" class="text-2xl font-black text-white mb-8 tracking-tighter">Novo Território</h2>
-            <div id="modal-content" class="space-y-6">
-                </div>
-            <div class="flex justify-end gap-4 mt-10">
-                <button onclick="closeModal()" class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Abortar</button>
-                <button id="modal-confirm" class="bg-emerald-600 px-10 py-4 rounded-2xl text-white font-black text-xs shadow-lg hover:bg-emerald-500 transition-all active:scale-95">CONFIRMAR</button>
+    <div id="modal-container" class="fixed inset-0 z-[10000] hidden flex items-center justify-center bg-black/90 backdrop-blur-md p-6">
+        <div class="bg-[#1c1c1e] w-full max-w-lg rounded-[3rem] border border-white/10 p-12 relative shadow-2xl">
+            <h2 id="modal-title" class="text-3xl font-black mb-8 tracking-tighter">Novo Registro</h2>
+            <div id="modal-content" class="space-y-6"></div>
+            <div class="flex justify-end gap-6 mt-12">
+                <button onclick="closeModal()" class="text-xs font-black text-slate-500 uppercase">Cancelar</button>
+                <button id="modal-confirm" class="bg-white text-black px-12 py-4 rounded-2xl text-xs font-black shadow-xl">EXECUTAR</button>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE (PADRONIZADO)
+        // CONFIGURAÇÃO SUPABASE
         const SUPABASE_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
         
-        // Inicialização com Fallback de Engenharia
-        let supabase;
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("Erro Crítico: SDK Supabase não carregado.", e);
-        }
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // STATE MANAGER
         let user = null;
+        let userRole = null; // S, M, B
+        let authMode = 'login';
         let accounts = [];
         let currentAccountId = null;
         let influences = [];
 
-        // VETORES BSM™ (ESTRUTURA JADIEL FREITAS)
         const VECTORS = [
-            { id: 'B1', name: 'Energia', group: 'Barreira' },
-            { id: 'B2', name: 'Tempo', group: 'Barreira' },
-            { id: 'B3', name: 'Dinheiro', group: 'Barreira' },
-            { id: 'B4', name: 'Eficiência', group: 'Barreira' },
-            { id: 'S1', name: 'Pertencimento', group: 'Social' },
-            { id: 'S2', name: 'Status', group: 'Social' },
-            { id: 'S3', name: 'Autoridade', group: 'Social' },
-            { id: 'S4', name: 'Escassez', group: 'Social' },
-            { id: 'M1', name: 'Prova', group: 'Mecanismo' },
-            { id: 'M2', name: 'Comparação', group: 'Mecanismo' },
-            { id: 'M3', name: 'Intuição', group: 'Mecanismo' },
-            { id: 'M4', name: 'Valores', group: 'Mecanismo' }
+            { id: 'B1', name: 'Energia' }, { id: 'B2', name: 'Tempo' }, { id: 'B3', name: 'Dinheiro' }, { id: 'B4', name: 'Eficiência' },
+            { id: 'S1', name: 'Pertencimento' }, { id: 'S2', name: 'Status' }, { id: 'S3', name: 'Autoridade' }, { id: 'S4', name: 'Escassez' },
+            { id: 'M1', name: 'Prova' }, { id: 'M2', name: 'Comparação' }, { id: 'M3', name: 'Intuição' }, { id: 'M4', name: 'Valores' }
         ];
 
-        // --- AUTH ENGINE ---
-        document.getElementById('login-form').onsubmit = async (e) => {
+        // --- AUTH LOGIC (S1, M2, B3) ---
+        function toggleAuthMode(mode) {
+            authMode = mode;
+            document.getElementById('tab-login').className = `flex-1 py-2 text-xs font-black rounded-xl ${mode === 'login' ? 'bg-white text-black' : 'text-slate-400'}`;
+            document.getElementById('tab-signup').className = `flex-1 py-2 text-xs font-black rounded-xl ${mode === 'signup' ? 'bg-white text-black' : 'text-slate-400'}`;
+            document.getElementById('signup-extra').classList.toggle('hidden', mode === 'login');
+            document.getElementById('btn-auth').innerText = mode === 'login' ? 'INICIALIZAR PROTOCOLO' : 'REGISTRAR NO CORE';
+        }
+
+        document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const btn = document.getElementById('btn-login');
+            const btn = document.getElementById('btn-auth');
+            const errDiv = document.getElementById('auth-error');
 
             btn.disabled = true;
-            btn.innerText = "AUTENTICANDO...";
+            errDiv.classList.add('hidden');
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            // VALIDAÇÃO DE SUFIXO (S1, M2, B3)
+            const suffix = password.slice(-2);
+            const validSuffixes = ['S1', 'M2', 'B3'];
             
-            if (error) {
-                document.getElementById('login-error').classList.remove('hidden');
+            if (!validSuffixes.includes(suffix)) {
+                showAuthError("Sufixo de segurança inválido (Use S1, M2 ou B3).");
                 btn.disabled = false;
-                btn.innerText = "INICIALIZAR PROTOCOLO";
-            } else {
-                initApp(data.user);
+                return;
             }
+
+            if (authMode === 'signup') {
+                const selectedRole = document.getElementById('role-select').value;
+                // Garantir que o sufixo bate com a role selecionada
+                if ((selectedRole === 'S' && suffix !== 'S1') || (selectedRole === 'M' && suffix !== 'M2') || (selectedRole === 'B' && suffix !== 'B3')) {
+                    showAuthError("O sufixo da senha não corresponde ao nível selecionado.");
+                    btn.disabled = false;
+                    return;
+                }
+
+                const { data, error } = await supabase.auth.signUp({
+                    email, password,
+                    options: { data: { role: selectedRole, suffix: suffix } }
+                });
+                
+                if (error) showAuthError(error.message);
+                else alert("Verifique seu e-mail para confirmar o registro.");
+            } else {
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) showAuthError("Falha na autenticação. Verifique e-mail e senha.");
+                else handleAuthSuccess(data.user, suffix);
+            }
+            btn.disabled = false;
         };
 
-        async function handleLogout() {
-            await supabase.auth.signOut();
-            window.location.reload();
-        }
-
-        async function initApp(userData) {
+        function handleAuthSuccess(userData, suffix) {
             user = userData;
-            document.getElementById('auth-ui').style.display = 'none';
-            const dash = document.getElementById('dashboard-ui');
-            dash.style.display = 'flex';
-            setTimeout(() => dash.classList.add('fade-in'), 100);
+            // A role vem dos metadados ou do sufixo usado no login
+            userRole = suffix.charAt(0); // S, M ou B
             
-            await loadAccounts();
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-interface').style.display = 'flex';
+            
+            document.getElementById('user-role-display').innerText = suffix;
+            document.getElementById('current-user-email').innerText = user.email;
+
+            applyRolePermissions(userRole);
+            loadAccounts();
             buildRadar();
         }
 
-        // --- DATA ENGINE ---
+        function applyRolePermissions(role) {
+            // Nível S (Sales) - Base
+            // Nível M (Manager) - Adiciona Gestão
+            if (role === 'M' || role === 'B') {
+                document.getElementById('m-section').classList.remove('hidden');
+            }
+            // Nível B (Business) - Adiciona Admin
+            if (role === 'B') {
+                document.getElementById('b-controls').classList.remove('hidden');
+            }
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('email').value;
+            if (!email) return alert("Insira seu e-mail de acesso.");
+            await supabase.auth.resetPasswordForEmail(email);
+            alert("Protocolo de recuperação enviado para " + email);
+        }
+
+        // --- CORE ENGINE ---
         async function loadAccounts() {
-            const { data, error } = await supabase.from('accounts').select('*').order('created_at', { ascending: false });
+            const { data } = await supabase.from('accounts').select('*').order('created_at', { ascending: false });
             if (data) {
                 accounts = data;
                 renderAccounts();
@@ -294,19 +330,14 @@
         }
 
         function renderAccounts() {
-            const container = document.getElementById('accounts-list');
-            container.innerHTML = accounts.map(acc => `
-                <div onclick="selectAccount('${acc.id}')" data-acc-id="${acc.id}" class="acc-card glass-panel p-5 rounded-[1.5rem] cursor-pointer hover:border-emerald-500/50 transition-all group relative overflow-hidden">
-                    <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-bold text-white group-hover:text-emerald-400 transition-colors truncate">${acc.name}</h4>
-                        <button onclick="event.stopPropagation(); deleteAccount('${acc.id}')" class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-rose-500 p-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        </button>
+            const list = document.getElementById('accounts-list');
+            list.innerHTML = accounts.map(acc => `
+                <div onclick="selectAccount('${acc.id}')" class="p-5 glass rounded-3xl cursor-pointer hover:border-emerald-500/50 transition-all group">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-black text-white group-hover:text-emerald-400">${acc.name}</span>
+                        <span class="text-[9px] font-black uppercase text-slate-600">${acc.status}</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="mono text-[10px] text-slate-500">R$ ${Number(acc.valor).toLocaleString('pt-BR')}</span>
-                        <span class="text-[9px] font-black uppercase ${acc.status === 'Event Horizon' ? 'text-emerald-500' : 'text-slate-600'}">${acc.status}</span>
-                    </div>
+                    <div class="text-[10px] mono text-slate-500">VALOR: R$ ${Number(acc.valor).toLocaleString()}</div>
                 </div>
             `).join('');
         }
@@ -314,137 +345,90 @@
         async function selectAccount(id) {
             currentAccountId = id;
             const acc = accounts.find(a => a.id === id);
-            
-            document.getElementById('radar-empty').classList.add('hidden');
-            document.getElementById('radar-ui').classList.remove('hidden');
-            document.getElementById('nav-acc-name').innerText = acc.name;
-            document.getElementById('nav-acc-status').innerText = `Status: ${acc.status}`;
-
-            // Visual active state
-            document.querySelectorAll('.acc-card').forEach(el => el.classList.remove('border-emerald-500', 'bg-emerald-500/5'));
-            document.querySelector(`[data-acc-id="${id}"]`).classList.add('border-emerald-500', 'bg-emerald-500/5');
-
-            await Promise.all([loadInfluences(), loadActions()]);
-            processBSM();
+            await loadInfluences();
+            await loadActions();
+            processBSMLogic();
         }
 
-        // --- RADAR BSM™ LOGIC ---
         function buildRadar() {
             const svg = document.getElementById('bsm-radar-svg');
-            const center = 250;
-            const radius = 220;
-            const inner = 80;
+            const center = 275;
+            const radius = 240;
+            const inner = 100;
 
             VECTORS.forEach((v, i) => {
-                const startAngle = (i * 30 - 90) * (Math.PI / 180);
-                const endAngle = ((i + 1) * 30 - 90) * (Math.PI / 180);
+                const start = (i * 30 - 90) * (Math.PI / 180);
+                const end = ((i + 1) * 30 - 90) * (Math.PI / 180);
                 
-                const p1 = [center + radius * Math.cos(startAngle), center + radius * Math.sin(startAngle)];
-                const p2 = [center + radius * Math.cos(endAngle), center + radius * Math.sin(endAngle)];
-                const p3 = [center + inner * Math.cos(endAngle), center + inner * Math.sin(endAngle)];
-                const p4 = [center + inner * Math.cos(startAngle), center + inner * Math.sin(startAngle)];
+                const d = `
+                    M ${center + radius * Math.cos(start)} ${center + radius * Math.sin(start)}
+                    A ${radius} ${radius} 0 0 1 ${center + radius * Math.cos(end)} ${center + radius * Math.sin(end)}
+                    L ${center + inner * Math.cos(end)} ${center + inner * Math.sin(end)}
+                    A ${inner} ${inner} 0 0 0 ${center + inner * Math.cos(start)} ${center + inner * Math.sin(start)} Z
+                `;
 
-                const d = `M ${p1[0]} ${p1[1]} A ${radius} ${radius} 0 0 1 ${p2[0]} ${p2[1]} L ${p3[0]} ${p3[1]} A ${inner} ${inner} 0 0 0 ${p4[0]} ${p4[1]} Z`;
-                
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("d", d);
                 path.setAttribute("id", `vec-${v.id}`);
-                path.setAttribute("class", "radar-segment fill-slate-900/50 stroke-slate-800");
-                path.onclick = () => toggleInfluence(v.id);
-                
+                path.setAttribute("class", "radar-segment fill-white/5 stroke-white/10");
+                path.onclick = () => toggleVector(v.id);
                 svg.appendChild(path);
 
-                // Labels
-                const textAngle = (i * 30 - 75) * (Math.PI / 180);
-                const tx = center + (radius + 25) * Math.cos(textAngle);
-                const ty = center + (radius + 25) * Math.sin(textAngle);
+                const labelAngle = (i * 30 - 75) * (Math.PI / 180);
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", tx);
-                text.setAttribute("y", ty);
+                text.setAttribute("x", center + (radius + 20) * Math.cos(labelAngle));
+                text.setAttribute("y", center + (radius + 20) * Math.sin(labelAngle));
                 text.setAttribute("text-anchor", "middle");
-                text.setAttribute("class", "fill-slate-600 font-black text-[10px] mono tracking-widest");
+                text.setAttribute("class", "fill-slate-600 text-[10px] font-black mono");
                 text.textContent = v.id;
                 svg.appendChild(text);
             });
         }
 
-        async function toggleInfluence(code) {
+        async function toggleVector(code) {
+            if (!currentAccountId) return;
             const existing = influences.find(inf => inf.influence_code === code);
-            let nextState = 'neutro';
+            let next = 'neutro';
 
-            if (!existing || existing.state === 'neutro') nextState = 'ativo';
-            else if (existing.state === 'ativo') nextState = 'removido';
+            if (!existing || existing.state === 'neutro') next = 'ativo';
+            else if (existing.state === 'ativo') next = 'removido';
 
-            // Optimistic UI
-            if (existing) existing.state = nextState;
-            else influences.push({ influence_code: code, state: nextState });
-
-            renderRadarStates();
-            processBSM();
-
-            // Persist
             await supabase.from('influences').upsert({
                 account_id: currentAccountId,
                 user_id: user.id,
                 influence_code: code,
-                state: nextState
+                state: next
             }, { onConflict: 'account_id,influence_code' });
+
+            await loadInfluences();
+            processBSMLogic();
         }
 
-        function renderRadarStates() {
+        function processBSMLogic() {
+            const active = influences.filter(i => i.state === 'ativo').length;
+            const gravit = ((12 - active) / 12) * 100;
+            
+            document.getElementById('gravit-val').innerText = Math.round(gravit) + '%';
+            
+            const insight = document.getElementById('insight-text');
+            if (active > 8) { insight.innerText = "Saturação Crítica. O território está travado por inércia estrutural. Remova B1 ou B3."; }
+            else if (gravit > 70) { insight.innerText = "Event Horizon atingido. O fechamento é uma consequência natural da estrutura atual."; }
+            else { insight.innerText = "Influência ativa. Foque em remover as barreiras sociais (S1-S4) para aumentar a tração."; }
+
             VECTORS.forEach(v => {
                 const el = document.getElementById(`vec-${v.id}`);
-                const state = influences.find(inf => inf.influence_code === v.id)?.state || 'neutro';
-                
-                if (state === 'ativo') {
-                    el.style.fill = 'rgba(244, 63, 94, 0.4)'; el.style.stroke = '#f43f5e';
-                } else if (state === 'removido') {
-                    el.style.fill = 'rgba(16, 185, 129, 0.4)'; el.style.stroke = '#10b981';
-                } else {
-                    el.style.fill = 'rgba(15, 23, 42, 0.5)'; el.style.stroke = '#1e2937';
-                }
+                const state = influences.find(i => i.influence_code === v.id)?.state || 'neutro';
+                el.style.fill = state === 'ativo' ? 'rgba(244,63,94,0.4)' : state === 'removido' ? 'rgba(52,199,89,0.4)' : 'rgba(255,255,255,0.05)';
+                el.style.stroke = state === 'ativo' ? '#f43f5e' : state === 'removido' ? '#34c759' : 'rgba(255,255,255,0.1)';
             });
         }
 
-        function processBSM() {
-            const active = influences.filter(inf => inf.state === 'ativo').length;
-            const removed = influences.filter(inf => inf.state === 'removido').length;
-            
-            // Fórmula BSM™: Gravit = (12 - Ativos) / 12
-            const gravit = (12 - active) / 12;
-            const prob = Math.round(gravit * 95);
-
-            document.getElementById('radar-prob-val').innerText = prob + '%';
-            document.getElementById('stat-idt').innerText = prob + '%';
-            document.getElementById('stat-entropy').innerText = active > 7 ? 'CRÍTICA' : active > 4 ? 'ALTA' : 'ESTÁVEL';
-            document.getElementById('global-gravit-val').innerText = Math.round(gravit * 100) + '%';
-            
-            const path = document.getElementById('global-gravit-path');
-            path.setAttribute('stroke-dasharray', `${Math.round(gravit * 100)}, 100`);
-
-            // Intelligent Insights
-            const box = document.getElementById('insight-box');
-            if (active >= 8) {
-                box.innerText = "Saturação de barreiras detectada. O território está em estado de inércia absoluta. Foque na remoção de S1 (Pertencimento) para gerar movimento inicial.";
-            } else if (prob > 70) {
-                box.innerText = "Zona de Event Horizon atingida. O fechamento agora é uma questão estrutural. Garanta que o vetor M1 (Prova) esteja validado.";
-            } else {
-                box.innerText = "Movimentação tática em curso. Aumente a Autoridade (S3) para colapsar as barreiras de Eficiência (B4).";
-            }
-        }
-
-        // --- ACTIONS ENGINE ---
         async function loadActions() {
             const { data } = await supabase.from('actions').select('*').eq('account_id', currentAccountId).order('created_at', { ascending: false });
             if (data) {
-                const list = document.getElementById('actions-list');
-                list.innerHTML = data.map(act => `
-                    <div class="glass-panel p-4 rounded-2xl border-l-2 border-emerald-500/50">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[9px] font-black text-slate-500 uppercase">${new Date(act.created_at).toLocaleDateString()}</span>
-                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                        </div>
-                        <p class="text-[11px] text-slate-300 leading-relaxed font-medium">${act.description}</p>
+                document.getElementById('actions-list').innerHTML = data.map(a => `
+                    <div class="p-4 glass rounded-2xl border-l-4 border-emerald-500">
+                        <p class="text-[11px] font-medium text-slate-300">${a.description}</p>
                     </div>
                 `).join('');
             }
@@ -452,80 +436,57 @@
 
         async function submitAction() {
             const input = document.getElementById('action-input');
-            const desc = input.value.trim();
-            if (!desc || !currentAccountId) return;
-
-            const { data } = await supabase.from('actions').insert({
-                account_id: currentAccountId,
-                user_id: user.id,
-                description: desc
-            }).select().single();
-
-            if (data) {
-                input.value = '';
-                await loadActions();
-            }
+            if (!input.value || !currentAccountId) return;
+            await supabase.from('actions').insert({ account_id: currentAccountId, user_id: user.id, description: input.value });
+            input.value = '';
+            loadActions();
         }
 
-        // --- UTILS & MODAIS ---
-        async function loadInfluences() {
-            const { data } = await supabase.from('influences').select('*').eq('account_id', currentAccountId);
-            influences = data || [];
-            renderRadarStates();
+        function showAuthError(msg) {
+            const err = document.getElementById('auth-error');
+            err.innerText = msg;
+            err.classList.remove('hidden');
         }
 
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+
+        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
+        
         function openModal(type) {
-            const container = document.getElementById('modal-container');
+            const modal = document.getElementById('modal-container');
             const content = document.getElementById('modal-content');
             const confirm = document.getElementById('modal-confirm');
 
             if (type === 'new-account') {
                 content.innerHTML = `
-                    <div class="space-y-4">
-                        <input id="n-name" type="text" placeholder="Nome da Conta" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
-                        <input id="n-valor" type="number" placeholder="Valor Estimado (R$)" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
-                        <select id="n-status" class="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 text-white">
-                            <option value="Lead">Lead</option>
-                            <option value="Tração">Tração</option>
-                            <option value="Event Horizon">Event Horizon</option>
-                        </select>
-                    </div>
+                    <input id="n-name" type="text" placeholder="Nome do Território" class="w-full input-bsm px-6 py-4 text-white">
+                    <input id="n-valor" type="number" placeholder="Valor Estimado" class="w-full input-bsm px-6 py-4 text-white">
                 `;
                 confirm.onclick = async () => {
                     const name = document.getElementById('n-name').value;
                     const valor = document.getElementById('n-valor').value;
-                    const status = document.getElementById('n-status').value;
-                    if (!name) return;
-
-                    const { data } = await supabase.from('accounts').insert({
-                        name, valor, status, user_id: user.id
-                    }).select().single();
-
-                    if (data) {
-                        accounts.unshift(data);
-                        renderAccounts();
-                        closeModal();
-                        selectAccount(data.id);
-                    }
+                    const { data } = await supabase.from('accounts').insert({ name, valor, user_id: user.id, status: 'Lead' }).select().single();
+                    if (data) { accounts.unshift(data); renderAccounts(); closeModal(); }
                 };
             }
-            container.classList.remove('hidden');
+            modal.classList.remove('hidden');
         }
 
-        function closeModal() { document.getElementById('modal-container').classList.add('hidden'); }
-
-        async function deleteAccount(id) {
-            if (!confirm("Confirmar deleção do território?")) return;
-            await supabase.from('accounts').delete().eq('id', id);
-            accounts = accounts.filter(a => a.id !== id);
-            if (currentAccountId === id) window.location.reload();
-            renderAccounts();
+        async function loadInfluences() {
+            const { data } = await supabase.from('influences').select('*').eq('account_id', currentAccountId);
+            influences = data || [];
         }
 
-        // Recuperação de Sessão Persistente
         window.onload = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (session) initApp(session.user);
+            if (session) {
+                // Ao recuperar sessão, precisamos revalidar o sufixo/role
+                // No sistema real, usaríamos a senha salva no password manager ou metadados persistentes
+                handleAuthSuccess(session.user, session.user.user_metadata.suffix || 'S1');
+            }
         };
     </script>
 </body>
