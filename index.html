@@ -3,446 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>STG-BSM™ | Core Engine</title>
+    <title>STG-BSM™ OS | Enterprise Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono&display=swap');
-        :root { --bg: #05070a; --card: #0d1117; --accent: #10b981; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #e6edf3; -webkit-font-smoothing: antialiased; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        .glass { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        .btn-primary { background: var(--accent); color: black; font-weight: 900; transition: 0.2s; border-radius: 8px; }
-        .btn-primary:active { transform: scale(0.95); }
-        input, select, textarea { background: #161b22 !important; border: 1px solid #30363d !important; color: white !important; border-radius: 8px; padding: 12px; outline: none; }
-        input:focus { border-color: var(--accent) !important; }
-        .hide { display: none !important; }
-        #app-loader { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; items-center: center; justify-content: center; }
-        .card-account { border-left: 4px solid transparent; transition: 0.3s; }
-        .card-account.active { border-left-color: var(--accent); background: rgba(16, 185, 129, 0.05); }
-        /* Scrollbar Slim */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono&display=swap');
+        
+        :root { --bg: #020617; --card: #0f172a; --accent: #10b981; --border: rgba(255,255,255,0.1); }
+        
+        body, html { 
+            height: 100%; margin: 0; background: var(--bg); color: white; 
+            font-family: 'Inter', sans-serif; overflow: hidden;
+        }
+
+        .app-container { display: none; height: 100vh; flex-direction: column; }
+        .active-app { display: flex !important; }
+
+        /* Componentes de UI */
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); border: 1px solid var(--border); }
+        .input-field { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; color: white; width: 100%; transition: 0.2s; }
+        .input-field:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+        
+        .btn-bsm { background: var(--accent); color: #020617; font-weight: 800; padding: 14px; border-radius: 12px; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-align: center; border: none; }
+        .btn-bsm:active { transform: scale(0.97); }
+
+        /* Scroll Customizado */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        /* Radar Fix */
+        .vector-path { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .vector-path:hover { filter: brightness(1.2); }
     </style>
 </head>
 <body>
 
-    <div id="app-loader">
-        <div class="text-2xl font-black animate-pulse text-emerald-500">BSM™ INITIALIZING...</div>
-    </div>
-
-    <div id="auth-screen" class="hide min-h-screen flex items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#111827_0%,_#05070a_100%)]">
-        <div class="w-full max-w-sm">
-            <div class="text-center mb-10">
-                <h1 class="text-5xl font-black tracking-tighter">STG-BSM<span class="text-emerald-500">™</span></h1>
-                <div class="h-1 w-12 bg-emerald-500 mx-auto mt-2"></div>
-            </div>
-            
-            <div class="glass p-8 rounded-3xl shadow-2xl">
-                <div class="flex mb-6 bg-black/40 p-1 rounded-xl">
-                    <button onclick="setAuthMode('login')" id="tab-login" class="flex-1 py-2 text-[10px] font-black rounded-lg bg-white text-black transition-all">ENTRAR</button>
-                    <button onclick="setAuthMode('signup')" id="tab-signup" class="flex-1 py-2 text-[10px] font-black rounded-lg text-slate-400 transition-all">REGISTRAR</button>
-                </div>
-
-                <form id="auth-form" class="space-y-4">
-                    <input type="email" id="auth-email" placeholder="Email" class="w-full" required>
-                    <input type="password" id="auth-password" placeholder="Senha" class="w-full" required>
-                    
-                    <div id="signup-extra" class="hide space-y-4">
-                        <select id="auth-role" class="w-full">
-                            <option value="S">Sales (S1)</option>
-                            <option value="M">Manager (M2)</option>
-                            <option value="B">Business (B3)</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" id="auth-btn" class="w-full btn-primary py-4 uppercase tracking-widest text-xs">Acessar Terminal</button>
-                    
-                    <button type="button" onclick="resetPassword()" class="w-full text-[9px] font-bold text-slate-500 hover:text-white uppercase tracking-widest mt-2">
-                        Recuperar Chave de Acesso
-                    </button>
-                </form>
-                <div id="auth-msg" class="mt-4 text-[10px] text-center font-bold uppercase hidden"></div>
-            </div>
+    <div id="boot-loader" class="fixed inset-0 z-[9999] bg-[#020617] flex items-center justify-center">
+        <div class="text-center">
+            <div class="text-4xl font-black tracking-tighter animate-pulse">BSM<span class="text-emerald-500">™</span></div>
+            <div class="text-[10px] text-slate-500 mt-2 font-mono uppercase tracking-[0.5em]">System Booting...</div>
         </div>
     </div>
 
-    <div id="main-dashboard" class="hide flex flex-col h-screen">
-        <header class="h-16 border-b border-white/5 flex items-center justify-between px-6 glass shrink-0">
-            <div class="flex items-center gap-4">
-                <span class="font-black tracking-tighter text-xl">BSM™</span>
-                <span id="user-role-tag" class="text-[9px] font-black bg-emerald-500 text-black px-2 py-0.5 rounded">S1</span>
-                <span id="save-indicator" class="text-[9px] text-slate-500 font-bold uppercase hidden">● Sincronizado</span>
-            </div>
-            
-            <div id="ia-bar" class="hidden md:flex flex-1 max-w-md mx-10 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 items-center gap-3">
-                <span class="text-[9px] font-black text-emerald-500">IA_INSIGHT:</span>
-                <marquee id="ia-text" class="text-[10px] font-medium text-emerald-200">Analizando território... aguardando dados operacionais.</marquee>
+    <div id="auth-view" class="h-screen w-full flex items-center justify-center bg-[radial-gradient(circle_at_top,_#1e293b_0%,_#020617_100%)] p-6">
+        <div class="w-full max-w-sm glass p-8 rounded-[2.5rem] shadow-2xl">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-black">LOGIN</h1>
+                <p class="text-xs text-slate-400 mt-1 uppercase tracking-widest">Acesse o Terminal Estratégico</p>
             </div>
 
-            <button onclick="logout()" class="text-slate-500 hover:text-white transition-colors">
+            <form id="auth-form" class="space-y-4">
+                <input type="email" id="email" class="input-field" placeholder="E-mail Corporativo" required>
+                <input type="password" id="password" class="input-field" placeholder="Senha" required>
+                
+                <div id="register-only" class="hidden space-y-4">
+                    <select id="role-select" class="input-field">
+                        <option value="S">Sales (Nível S1)</option>
+                        <option value="M">Manager (Nível M2)</option>
+                        <option value="B" selected>Business (Nível B3)</option>
+                    </select>
+                </div>
+
+                <div id="auth-error" class="hidden text-[10px] font-bold text-rose-500 text-center uppercase p-2 border border-rose-500/20 bg-rose-500/5 rounded-lg"></div>
+
+                <button type="submit" id="btn-submit" class="w-full btn-bsm">Acessar BSM</button>
+
+                <div class="flex justify-between items-center px-2">
+                    <button type="button" onclick="toggleAuthMode()" id="toggle-mode" class="text-[10px] text-slate-500 hover:text-white uppercase font-bold">Criar nova conta</button>
+                    <button type="button" onclick="recoverPass()" class="text-[10px] text-slate-500 hover:text-white uppercase font-bold">Recuperar senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="app-view" class="app-container">
+        <header class="h-16 border-b border-white/5 flex items-center justify-between px-6 shrink-0 bg-slate-950/50">
+            <div class="flex items-center gap-4">
+                <span class="text-xl font-black tracking-tighter">STG-BSM<span class="text-emerald-500">™</span></span>
+                <div id="status-badge" class="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-[9px] font-black rounded uppercase">Online</div>
+            </div>
+            <button onclick="logout()" class="text-slate-500 hover:text-rose-500 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </header>
 
         <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
             
-            <aside class="w-full md:w-80 border-r border-white/5 flex flex-col glass overflow-hidden">
-                <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
-                    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Territórios</h2>
-                    <button onclick="showAccountModal()" class="w-6 h-6 btn-primary flex items-center justify-center text-lg">+</button>
+            <aside class="w-full md:w-80 border-r border-white/5 flex flex-col bg-slate-950/20">
+                <div class="p-4 border-b border-white/5 flex justify-between items-center">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Territórios</h3>
+                    <button onclick="openAccModal()" class="w-6 h-6 bg-emerald-600 rounded-full flex items-center justify-center font-bold text-black">+</button>
                 </div>
-                <div id="accounts-container" class="flex-1 overflow-y-auto p-3 space-y-2">
+                <div id="acc-list" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scroll">
                     </div>
             </aside>
 
-            <main class="flex-1 flex flex-col bg-[radial-gradient(circle_at_center,_#0d1117_0%,_#05070a_100%)] overflow-y-auto">
-                <div id="metrics-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
-                    <div class="glass p-4 rounded-2xl">
-                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">Gravit™ Force</div>
-                        <div id="m-gravit" class="text-3xl font-black text-white">0%</div>
+            <main class="flex-1 flex flex-col items-center justify-center p-6 bg-[radial-gradient(circle_at_center,_#0f172a_0%,_#020617_100%)]">
+                <div id="ia-box" class="mb-8 glass p-4 rounded-2xl w-full max-w-lg border-emerald-500/20">
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                        <span class="text-[9px] font-black uppercase text-emerald-500 tracking-tighter">Insight de Soberania</span>
                     </div>
-                    <div class="glass p-4 rounded-2xl">
-                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">IDT™ Index</div>
-                        <div id="m-idt" class="text-3xl font-black text-emerald-500">0.0</div>
-                    </div>
-                    <div class="glass p-4 rounded-2xl">
-                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">EET™ Status</div>
-                        <div id="m-eet" class="text-3xl font-black text-white">N/A</div>
-                    </div>
-                    <div class="glass p-4 rounded-2xl">
-                        <div class="text-[9px] font-black text-slate-500 uppercase mb-1">TES™ Volume</div>
-                        <div id="m-tes" class="text-lg font-black text-white mono">R$ 0,00</div>
-                    </div>
+                    <p id="insight-text" class="text-xs text-slate-300 font-medium italic">Selecione um território para análise estrutural.</p>
                 </div>
 
-                <div class="flex-1 flex items-center justify-center p-4 min-h-[400px]">
-                    <div class="relative w-full max-w-[450px] aspect-square">
-                        <svg id="radar-svg" viewBox="0 0 500 500" class="w-full h-full drop-shadow-[0_0_30px_rgba(16,185,129,0.1)]"></svg>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <div class="text-center">
-                                <div id="center-g-val" class="text-6xl font-black text-white leading-none">0%</div>
-                                <div class="text-[9px] font-black text-emerald-500 tracking-[0.3em] uppercase mt-2">Active Orbit</div>
-                            </div>
-                        </div>
+                <div class="relative w-full max-w-[420px] aspect-square">
+                    <svg id="radar-svg" viewBox="0 0 500 500" class="w-full h-full"></svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                        <div id="gravit-val" class="text-6xl font-black leading-none">0%</div>
+                        <div class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-2">Gravit™ Force</div>
                     </div>
                 </div>
             </main>
 
-            <aside class="w-full md:w-96 border-l border-white/5 flex flex-col glass overflow-hidden">
-                <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
-                    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ações Táticas</h2>
-                    <span class="text-[9px] font-black text-emerald-500">FEEDBACK ATIVO</span>
+            <aside class="w-full md:w-96 border-l border-white/5 flex flex-col bg-slate-950/20">
+                <div class="p-4 border-b border-white/5">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Plano de Execução</h3>
                 </div>
-                
-                <div id="actions-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div id="action-list" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scroll">
                     </div>
-
-                <div class="p-4 bg-black/40 border-t border-white/5">
+                <div class="p-4 border-t border-white/5 bg-black/40">
                     <div class="flex gap-2">
-                        <input type="text" id="new-action-desc" placeholder="Descreva a ação..." class="flex-1 text-xs">
-                        <button onclick="createAction()" class="btn-primary px-4 py-2 uppercase text-[10px]">Add</button>
+                        <input type="text" id="action-input" class="input-field text-xs" placeholder="Nova ação tática...">
+                        <button onclick="addAction()" class="btn-bsm px-4 py-2 text-xs">OK</button>
                     </div>
                 </div>
             </aside>
         </div>
     </div>
 
-    <div id="account-modal" class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-6 hide">
-        <div class="glass w-full max-w-md rounded-[2.5rem] p-8">
-            <h3 class="text-2xl font-black mb-6 uppercase italic tracking-tighter">Novo Território</h3>
+    <div id="acc-modal" class="fixed inset-0 z-[1000] hidden bg-black/90 flex items-center justify-center p-6">
+        <div class="glass w-full max-w-md p-8 rounded-[2.5rem]">
+            <h2 class="text-2xl font-black mb-6 uppercase tracking-tighter">Novo Território</h2>
             <div class="space-y-4">
-                <input type="text" id="acc-name" placeholder="Nome do Cliente/Região" class="w-full">
-                <input type="number" id="acc-value" placeholder="Valor Estimado (R$)" class="w-full">
-                <select id="acc-status" class="w-full">
-                    <option value="Lead">Lead</option>
-                    <option value="Em Negociação">Em Negociação</option>
-                    <option value="Fechado">Fechado</option>
-                    <option value="Perdido">Perdido</option>
-                </select>
-                <div class="flex gap-2 pt-4">
-                    <button onclick="closeAccountModal()" class="flex-1 bg-white/5 py-3 rounded-xl font-bold uppercase text-[10px]">Cancelar</button>
-                    <button onclick="saveAccount()" class="flex-1 btn-primary py-3 rounded-xl font-bold uppercase text-[10px]">Criar Território</button>
+                <input type="text" id="acc-name" class="input-field" placeholder="Nome do Cliente/Conta">
+                <input type="number" id="acc-valor" class="input-field" placeholder="Valor Estimado (TES)">
+                <div class="flex gap-2">
+                    <button onclick="closeAccModal()" class="flex-1 py-3 bg-white/5 rounded-xl font-bold text-xs">CANCELAR</button>
+                    <button onclick="saveAccount()" class="flex-1 btn-bsm">CRIAR</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // PROTOCOLO DE CONEXÃO SUPABASE
         const SUPA_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
         const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-        let S = { user: null, role: 'S', accounts: [], influences: [], actions: [], activeAccId: null, authMode: 'login' };
+        // STATE MANAGEMENT
+        let G = {
+            user: null,
+            role: 'B',
+            mode: 'login',
+            accounts: [],
+            activeId: null,
+            influences: []
+        };
 
         const VECTORS = [
-            {id:'B1', n:'Energia'}, {id:'B2', n:'Tempo'}, {id:'B3', n:'Dinheiro'}, {id:'B4', n:'Eficiência'},
-            {id:'S1', n:'Status'}, {id:'S2', n:'Pertença'}, {id:'S3', n:'Autoridade'}, {id:'S4', n:'Escassez'},
-            {id:'M1', n:'Prova'}, {id:'M2', n:'Comparação'}, {id:'M3', n:'Intuição'}, {id:'M4', n:'Valores'}
+            'B1','B2','B3','B4','S1','S2','S3','S4','M1','M2','M3','M4'
         ];
 
-        /* --- MOTOR DE AUTENTICAÇÃO --- */
-        function setAuthMode(m) {
-            S.authMode = m;
-            document.getElementById('tab-login').className = `flex-1 py-2 text-[10px] font-black rounded-lg ${m==='login'?'bg-white text-black':'text-slate-400'}`;
-            document.getElementById('tab-signup').className = `flex-1 py-2 text-[10px] font-black rounded-lg ${m==='signup'?'bg-white text-black':'text-slate-400'}`;
-            document.getElementById('signup-extra').classList.toggle('hide', m==='login');
-            document.getElementById('auth-btn').innerText = m==='login' ? 'Acessar Terminal' : 'Criar Conta BSM';
+        // ENGINE DE AUTENTICAÇÃO
+        function toggleAuthMode() {
+            G.mode = G.mode === 'login' ? 'signup' : 'login';
+            document.getElementById('register-only').classList.toggle('hidden', G.mode === 'login');
+            document.getElementById('toggle-mode').innerText = G.mode === 'login' ? 'Criar nova conta' : 'Já tenho conta';
+            document.getElementById('btn-submit').innerText = G.mode === 'login' ? 'Acessar BSM' : 'Registrar BSM';
         }
 
         document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const role = document.getElementById('auth-role').value;
-            const msg = document.getElementById('auth-msg');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errBox = document.getElementById('auth-error');
+            const btn = document.getElementById('btn-submit');
 
-            msg.className = "mt-4 text-[10px] text-center font-bold uppercase text-emerald-500 block";
-            msg.innerText = "Processando...";
+            errBox.classList.add('hidden');
+            btn.disabled = true;
+            btn.innerText = "SINCRO...";
 
             try {
-                if(S.authMode === 'signup') {
-                    const { data, error } = await sb.auth.signUp({ 
-                        email, password, 
-                        options: { data: { role: role, suffix: password.slice(-2) } }
+                if(G.mode === 'signup') {
+                    const role = document.getElementById('role-select').value;
+                    const { error } = await sb.auth.signUp({ 
+                        email, password, options: { data: { role } } 
                     });
                     if(error) throw error;
-                    msg.innerText = "Sucesso! Verifique seu email para confirmar.";
+                    alert("Verifique seu email para confirmar.");
                 } else {
                     const { data, error } = await sb.auth.signInWithPassword({ email, password });
                     if(error) throw error;
                     location.reload();
                 }
             } catch (err) {
-                msg.innerText = err.message;
-                msg.className = "mt-4 text-[10px] text-center font-bold uppercase text-rose-500 block";
+                errBox.innerText = err.message;
+                errBox.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = G.mode === 'login' ? 'Acessar BSM' : 'Registrar BSM';
             }
         };
 
-        async function logout() { await sb.auth.signOut(); location.reload(); }
-
-        async function resetPassword() {
-            const email = document.getElementById('auth-email').value;
+        async function recoverPass() {
+            const email = document.getElementById('email').value;
             if(!email) return alert("Digite o email.");
             await sb.auth.resetPasswordForEmail(email);
-            alert("Email de recuperação enviado.");
+            alert("Email enviado.");
         }
 
-        /* --- MOTOR DE DADOS (CRUD ACCOUNTS) --- */
+        // ENGINE OPERACIONAL (CRUD)
         async function loadAccounts() {
             const { data } = await sb.from('accounts').select('*').order('created_at', {ascending: false});
-            S.accounts = data || [];
+            G.accounts = data || [];
             renderAccounts();
-            generateIAInsights();
         }
 
         function renderAccounts() {
-            const container = document.getElementById('accounts-container');
-            container.innerHTML = S.accounts.map(acc => `
-                <div onclick="selectAccount('${acc.id}')" class="card-account glass p-4 rounded-xl cursor-pointer hover:bg-white/5 ${S.activeAccId === acc.id ? 'active' : ''}">
-                    <div class="flex justify-between items-start">
-                        <span class="text-[11px] font-black uppercase text-white truncate w-32">${acc.name}</span>
+            const list = document.getElementById('acc-list');
+            list.innerHTML = G.accounts.map(acc => `
+                <div onclick="selectAccount('${acc.id}')" class="p-4 glass rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-all ${G.activeId === acc.id ? 'border-emerald-500 bg-emerald-500/10' : ''}">
+                    <div class="text-[11px] font-black uppercase text-white truncate">${acc.name}</div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-[9px] mono text-slate-500">TES: R$ ${Number(acc.valor).toLocaleString()}</span>
                         <button onclick="deleteAccount(event, '${acc.id}')" class="text-slate-600 hover:text-rose-500 text-[10px]">✕</button>
-                    </div>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="text-[9px] mono text-slate-500">R$ ${Number(acc.valor).toLocaleString()}</span>
-                        <span class="text-[8px] font-black bg-white/5 px-2 py-0.5 rounded text-slate-400 uppercase">${acc.status}</span>
                     </div>
                 </div>
             `).join('');
         }
 
         async function selectAccount(id) {
-            S.activeAccId = id;
+            G.activeId = id;
             renderAccounts();
             await loadInfluences();
             await loadActions();
-            processMetrics();
+            updateDashboard();
         }
 
         async function saveAccount() {
             const name = document.getElementById('acc-name').value;
-            const valor = document.getElementById('acc-value').value;
-            const status = document.getElementById('acc-status').value;
-
+            const valor = document.getElementById('acc-valor').value;
             if(!name) return;
+
             const { error } = await sb.from('accounts').insert({
-                name, valor, status, user_id: S.user.id
+                name, valor, user_id: G.user.id
             });
-            
             if(!error) {
-                closeAccountModal();
+                closeAccModal();
                 loadAccounts();
             }
         }
 
         async function deleteAccount(e, id) {
             e.stopPropagation();
-            if(!confirm("Deseja excluir este território?")) return;
+            if(!confirm("Excluir território?")) return;
             await sb.from('accounts').delete().eq('id', id);
-            if(S.activeAccId === id) S.activeAccId = null;
+            if(G.activeId === id) G.activeId = null;
             loadAccounts();
         }
 
-        /* --- MOTOR DE INFLUÊNCIAS (RADAR) --- */
-        async function loadInfluences() {
-            const { data } = await sb.from('influences').select('*').eq('account_id', S.activeAccId);
-            S.influences = data || [];
-            drawRadar();
-        }
-
-        function drawRadar() {
+        // ENGINE DE RADAR
+        function initRadar() {
             const svg = document.getElementById('radar-svg');
-            svg.innerHTML = '';
-            const center = 250, r = 210, inner = 90;
+            const center = 250, r = 220, inner = 100;
 
-            VECTORS.forEach((v, i) => {
-                const start = (i * 30 - 90) * (Math.PI / 180);
-                const end = ((i + 1) * 30 - 90) * (Math.PI / 180);
-                const d = `M ${center + r * Math.cos(start)} ${center + r * Math.sin(start)} A ${r} ${r} 0 0 1 ${center + r * Math.cos(end)} ${center + r * Math.sin(end)} L ${center + inner * Math.cos(end)} ${center + inner * Math.sin(end)} A ${inner} ${inner} 0 0 0 ${center + inner * Math.cos(start)} ${center + inner * Math.sin(start)} Z`;
-                
+            VECTORS.forEach((code, i) => {
+                const startAng = (i * 30 - 90) * (Math.PI / 180);
+                const endAng = ((i + 1) * 30 - 90) * (Math.PI / 180);
+
+                const d = `
+                    M ${center + r * Math.cos(startAng)} ${center + r * Math.sin(startAng)}
+                    A ${r} ${r} 0 0 1 ${center + r * Math.cos(endAng)} ${center + r * Math.sin(endAng)}
+                    L ${center + inner * Math.cos(endAng)} ${center + inner * Math.sin(endAng)}
+                    A ${inner} ${inner} 0 0 0 ${center + inner * Math.cos(startAng)} ${center + inner * Math.sin(startAng)}
+                    Z
+                `;
+
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("d", d);
-                
-                const inf = S.influences.find(inf => inf.influence_code === v.id);
-                let fill = 'rgba(255,255,255,0.03)';
-                let stroke = 'rgba(255,255,255,0.1)';
-
-                if(inf?.state === 'ativo') { fill = 'rgba(244,63,94,0.3)'; stroke = '#f43f5e'; }
-                else if(inf?.state === 'removido') { fill = 'rgba(16,185,129,0.3)'; stroke = '#10b981'; }
-
-                path.setAttribute("fill", fill);
-                path.setAttribute("stroke", stroke);
-                path.setAttribute("stroke-width", "1.5");
-                path.setAttribute("class", "radar-segment");
-                path.onclick = () => toggleInfluence(v.id);
+                path.setAttribute("id", "vec-" + code);
+                path.setAttribute("class", "vector-path fill-white/5 stroke-white/10");
+                path.onclick = () => toggleVector(code);
                 svg.appendChild(path);
 
-                // Labels ID
-                const mid = (i * 30 - 75) * (Math.PI / 180);
-                const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                txt.setAttribute("x", center + (r + 20) * Math.cos(mid));
-                txt.setAttribute("y", center + (r + 20) * Math.sin(mid));
-                txt.setAttribute("text-anchor", "middle");
-                txt.setAttribute("class", "fill-slate-500 text-[10px] font-black mono");
-                txt.textContent = v.id;
-                svg.appendChild(txt);
+                // Labels
+                const midAng = (i * 30 - 75) * (Math.PI / 180);
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", center + (r + 20) * Math.cos(midAng));
+                text.setAttribute("y", center + (r + 20) * Math.sin(midAng));
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("class", "fill-slate-600 text-[10px] font-black mono");
+                text.textContent = code;
+                svg.appendChild(text);
             });
-            updateGravitUI();
         }
 
-        async function toggleInfluence(code) {
-            if(!S.activeAccId) return;
-            const exist = S.influences.find(i => i.influence_code === code);
-            let next = 'ativo';
-            if(exist?.state === 'ativo') next = 'removido';
-            else if(exist?.state === 'removido') next = 'neutro';
+        async function loadInfluences() {
+            const { data } = await sb.from('influences').select('*').eq('account_id', G.activeId);
+            G.influences = data || [];
+            updateRadarColors();
+        }
+
+        async function toggleVector(code) {
+            if(!G.activeId) return;
+            const exist = G.influences.find(i => i.influence_code === code);
+            let state = 'ativo';
+            if(exist?.state === 'ativo') state = 'removido';
+            else if(exist?.state === 'removido') state = 'neutro';
 
             await sb.from('influences').upsert({
-                account_id: S.activeAccId, influence_code: code, state: next, user_id: S.user.id
+                account_id: G.activeId, influence_code: code, state, user_id: G.user.id
             }, { onConflict: 'account_id,influence_code' });
 
             await loadInfluences();
-            processMetrics();
+            updateDashboard();
         }
 
-        /* --- MOTOR DE AÇÕES --- */
+        function updateRadarColors() {
+            VECTORS.forEach(code => {
+                const el = document.getElementById('vec-' + code);
+                const inf = G.influences.find(i => i.influence_code === code);
+                
+                if(inf?.state === 'ativo') {
+                    el.style.fill = 'rgba(244,63,94,0.4)'; el.style.stroke = '#f43f5e';
+                } else if(inf?.state === 'removido') {
+                    el.style.fill = 'rgba(16,185,129,0.4)'; el.style.stroke = '#10b981';
+                } else {
+                    el.style.fill = 'rgba(255,255,255,0.05)'; el.style.stroke = 'rgba(255,255,255,0.1)';
+                }
+            });
+        }
+
+        // ENGINE DE AÇÕES
         async function loadActions() {
-            const { data } = await sb.from('actions').select('*').eq('account_id', S.activeAccId).order('created_at', {ascending: false});
-            S.actions = data || [];
-            const container = document.getElementById('actions-container');
-            container.innerHTML = S.actions.map(a => `
-                <div class="glass p-4 rounded-2xl animate-fade-in relative group">
-                    <button onclick="deleteAction('${a.id}')" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-500 transition-all">✕</button>
-                    <p class="text-xs text-slate-300 font-medium">${a.description}</p>
-                    <div class="mt-2 text-[8px] font-black text-slate-600 uppercase mono">${new Date(a.created_at).toLocaleString()}</div>
+            const { data } = await sb.from('actions').select('*').eq('account_id', G.activeId).order('created_at', {ascending: false});
+            const list = document.getElementById('action-list');
+            list.innerHTML = (data || []).map(a => `
+                <div class="glass p-4 rounded-2xl border-l-4 border-emerald-500">
+                    <p class="text-[11px] text-slate-200">${a.description}</p>
+                    <span class="text-[8px] mono text-slate-600 uppercase mt-2 block">${new Date(a.created_at).toLocaleString()}</span>
                 </div>
             `).join('');
         }
 
-        async function createAction() {
-            const desc = document.getElementById('new-action-desc').value;
-            if(!desc || !S.activeAccId) return;
-            await sb.from('actions').insert({
-                account_id: S.activeAccId, description: desc, user_id: S.user.id
-            });
-            document.getElementById('new-action-desc').value = '';
+        async function addAction() {
+            const input = document.getElementById('action-input');
+            if(!input.value || !G.activeId) return;
+            await sb.from('actions').insert({ account_id: G.activeId, description: input.value, user_id: G.user.id });
+            input.value = '';
             loadActions();
         }
 
-        async function deleteAction(id) {
-            await sb.from('actions').delete().eq('id', id);
-            loadActions();
-        }
-
-        /* --- MÉTRICAS E IA --- */
-        function processMetrics() {
-            const acc = S.accounts.find(a => a.id === S.activeAccId);
-            const ativos = S.influences.filter(i => i.state === 'ativo').length;
-            const g = Math.round(((12 - ativos) / 12) * 100);
-
-            document.getElementById('m-tes').innerText = `R$ ${Number(acc?.valor || 0).toLocaleString()}`;
-            document.getElementById('m-gravit').innerText = g + '%';
-            document.getElementById('center-g-val').innerText = g + '%';
-            document.getElementById('m-idt').innerText = (ativos * 0.8).toFixed(1);
-            document.getElementById('m-eet').innerText = acc?.status || 'N/A';
+        // INTELIGÊNCIA BSM
+        function updateDashboard() {
+            const ativos = G.influences.filter(i => i.state === 'ativo').length;
+            const gravit = Math.round(((12 - ativos) / 12) * 100);
             
-            generateIAInsights();
+            document.getElementById('gravit-val').innerText = gravit + '%';
+            
+            const txt = document.getElementById('insight-text');
+            if(gravit < 40) txt.innerText = "RISCO ESTRUTURAL: Muitos bloqueios ativos. Execute remoção em B1 e B3.";
+            else if(gravit > 70) txt.innerText = "FORÇA OTIMIZADA: Território pronto para colapso de venda. Foque em M1.";
+            else txt.innerText = "MATURAÇÃO: Continue limpando os vetores sociais (S1-S4).";
         }
 
-        function updateGravitUI() {
-            const ativos = S.influences.filter(i => i.state === 'ativo').length;
-            const g = Math.round(((12 - ativos) / 12) * 100);
-            document.getElementById('center-g-val').innerText = g + '%';
-        }
+        // UI HELPERS
+        function openAccModal() { document.getElementById('acc-modal').classList.remove('hidden'); }
+        function closeAccModal() { document.getElementById('acc-modal').classList.add('hidden'); }
+        async function logout() { await sb.auth.signOut(); location.reload(); }
 
-        function generateIAInsights() {
-            const bar = document.getElementById('ia-bar');
-            const text = document.getElementById('ia-text');
-            bar.classList.remove('hidden');
-
-            if(S.accounts.length === 0) {
-                text.innerText = "SISTEMA OCIOSO: Adicione um território para iniciar o mapeamento estrutural.";
-                return;
-            }
-
-            if(!S.activeAccId) {
-                text.innerText = "SISTEMA PRONTO: Selecione um território para análise de força gravitacional.";
-                return;
-            }
-
-            const ativos = S.influences.filter(i => i.state === 'ativo').length;
-            if(ativos > 8) text.innerText = "ALERTA CRÍTICO: Bloqueio estrutural excessivo. Remova os vetores B1 e B3 para destravar a negociação.";
-            else if(ativos < 3) text.innerText = "OPORTUNIDADE ALTA: Baixa resistência detectada. Avance com o protocolo de fechamento IMEDIATAMENTE.";
-            else text.innerText = "ANÁLISE DE CAMPO: Território em fase de maturação. Monitore o vetor M1 para validação de prova.";
-        }
-
-        /* --- MODAIS E UI --- */
-        function showAccountModal() { document.getElementById('account-modal').classList.remove('hide'); }
-        function closeAccountModal() { document.getElementById('account-modal').classList.add('hide'); }
-
-        /* --- INICIALIZAÇÃO CORE --- */
-        window.onload = async () => {
-            const { data: { session } } = await sb.auth.getSession();
-            document.getElementById('app-loader').classList.add('hide');
-
-            if (session) {
-                S.user = session.user;
-                S.role = session.user.user_metadata?.role || 'S';
-                document.getElementById('auth-screen').classList.add('hide');
-                document.getElementById('main-dashboard').classList.add('active-view');
-                document.getElementById('user-role-tag').innerText = S.role + '1';
-                loadAccounts();
+        // BOOT SEQUENCE (PREVENT BLACK SCREEN)
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                initRadar();
                 
-                // Auto-save feedback visual
-                setInterval(() => {
-                    document.getElementById('save-indicator').classList.remove('hidden');
-                    setTimeout(() => document.getElementById('save-indicator').classList.add('hidden'), 2000);
-                }, 10000);
-            } else {
-                document.getElementById('auth-screen').classList.remove('hide');
+                if(session) {
+                    G.user = session.user;
+                    document.getElementById('auth-view').classList.add('hidden');
+                    document.getElementById('app-view').classList.add('active-app');
+                    loadAccounts();
+                } else {
+                    document.getElementById('auth-view').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Boot Error:", e);
+            } finally {
+                document.getElementById('boot-loader').style.display = 'none';
             }
-        };
+        });
     </script>
 </body>
 </html>
