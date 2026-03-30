@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BSM™ Core | Intelligence System</title>
+    <title>BSM™ Core | Business Structural Market</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -13,10 +13,12 @@
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .input-bsm { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 1rem; width: 100%; color: white; transition: 0.3s; }
-        .input-bsm:focus { border-color: var(--emerald); outline: none; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-        .radar-segment { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .input-bsm:focus { border-color: var(--emerald); outline: none; }
+        .radar-segment { transition: all 0.4s ease; cursor: pointer; }
         #dashboard { display: none; opacity: 0; transition: opacity 0.5s; }
         .active-view { display: flex !important; opacity: 1 !important; }
+        .animate-fade { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -25,7 +27,7 @@
         <div class="w-full max-w-md p-6">
             <div class="text-center mb-8">
                 <h1 class="text-6xl font-black tracking-tighter text-white">BSM<span class="text-emerald-500">™</span></h1>
-                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em] mt-2">Market Engineering</p>
+                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-[0.5em] mt-2">Structural Intelligence</p>
             </div>
 
             <div class="glass p-8 rounded-[2.5rem] shadow-2xl">
@@ -38,22 +40,23 @@
                     <input type="email" id="email" required class="input-bsm" placeholder="E-mail">
                     <input type="password" id="password" required class="input-bsm" placeholder="Senha">
                     
-                    <div id="signup-fields" class="hidden space-y-4">
+                    <div id="signup-fields" class="hidden space-y-4 animate-fade">
                         <select id="role-select" class="input-bsm appearance-none">
                             <option value="S">Sales (Nível S1)</option>
                             <option value="M">Manager (Nível M2)</option>
                             <option value="B">Business (Nível B3)</option>
                         </select>
+                        <p class="text-[9px] text-slate-500 px-2 uppercase font-bold tracking-tighter">A senha deve terminar com o código do nível (ex: 1234S1)</p>
                     </div>
 
                     <div id="auth-msg" class="hidden text-[10px] font-black text-center p-3 rounded-xl uppercase tracking-tighter"></div>
 
-                    <button type="submit" id="btn-exec" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg">
+                    <button type="submit" id="btn-exec" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-95">
                         ACESSAR TERMINAL
                     </button>
 
-                    <button type="button" onclick="recoverPassword()" class="w-full text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-2 hover:text-white transition-colors">
-                        Recuperar Chave de Acesso
+                    <button type="button" onclick="recoverPassword()" class="w-full text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-4 hover:text-white transition-colors">
+                        Esqueceu a senha? Recuperar Chave
                     </button>
                 </form>
             </div>
@@ -72,51 +75,64 @@
             
             <div class="flex items-center gap-4">
                 <div id="business-tools" class="hidden flex gap-4 mr-6 border-r border-white/10 pr-6">
-                    <button class="text-[10px] font-black text-slate-400">MASTER P&L</button>
+                    <button class="text-[10px] font-black text-slate-400 hover:text-white transition-colors">MASTER P&L</button>
+                    <button class="text-[10px] font-black text-slate-400 hover:text-white transition-colors">EQUIPES</button>
                 </div>
-                <button onclick="logout()" class="text-slate-500 hover:text-rose-500 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <button onclick="logout()" class="text-slate-500 hover:text-rose-500 transition-colors p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
             </div>
         </nav>
 
         <main class="flex-1 flex overflow-hidden">
-            <aside class="w-80 border-r border-white/5 p-6 flex flex-col">
-                <div id="manager-tools" class="hidden mb-8 p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl">
-                    <h4 class="text-[9px] font-black text-blue-400 uppercase mb-2">KPI de Território (M2)</h4>
-                    <div class="text-lg font-black" id="territory-value">R$ 0,00</div>
+            <aside class="w-80 border-r border-white/5 p-6 flex flex-col bg-black/20">
+                <div id="manager-tools" class="hidden mb-8 p-5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl animate-fade">
+                    <h4 class="text-[9px] font-black text-emerald-500 uppercase mb-2 tracking-widest">Gestão de Território (M2)</h4>
+                    <div class="text-xl font-black text-white" id="territory-value">R$ 0,00</div>
+                    <div class="text-[9px] text-slate-500 font-bold mt-1 uppercase">Volume sob Gestão</div>
                 </div>
 
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Territórios</h3>
-                    <button onclick="newAccount()" class="w-6 h-6 flex items-center justify-center bg-white/5 rounded-full text-emerald-500">+</button>
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Contas & Territórios</h3>
+                    <button onclick="newAccount()" class="w-7 h-7 flex items-center justify-center bg-white/5 hover:bg-emerald-500/20 rounded-full text-emerald-500 transition-colors">+</button>
                 </div>
-                <div id="acc-list" class="space-y-2 overflow-y-auto pr-2"></div>
+                <div id="acc-list" class="space-y-3 overflow-y-auto pr-2 custom-scroll"></div>
             </aside>
 
             <section class="flex-1 flex flex-col items-center justify-center p-10 bg-[radial-gradient(circle_at_center,_#111827_0%,_#020617_100%)]">
-                <div class="relative">
-                    <svg id="radar-svg" width="520" height="520" viewBox="0 0 520 520" class="drop-shadow-2xl"></svg>
+                <div class="relative group">
+                    <svg id="radar-svg" width="550" height="550" viewBox="0 0 550 550" class="drop-shadow-2xl transition-transform duration-700"></svg>
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span id="gravit-percent" class="text-6xl font-black text-white">0%</span>
-                        <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">Gravit™ Force</span>
+                        <div class="bg-black/60 backdrop-blur-md rounded-full w-40 h-40 flex flex-col items-center justify-center border border-white/5">
+                            <span id="gravit-percent" class="text-6xl font-black text-white leading-none">0%</span>
+                            <span class="text-[9px] font-black text-emerald-500 uppercase mt-2 tracking-[0.2em]">Gravit™ Force</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="mt-10 w-full max-w-xl glass p-6 rounded-[2rem] border-emerald-500/20">
-                    <div id="insight-box" class="text-sm italic text-slate-400 text-center font-medium leading-relaxed">
-                        Sistema em prontidão. Selecione um território operacional.
+                <div class="mt-12 w-full max-w-2xl glass p-8 rounded-[2.5rem] border-emerald-500/20 animate-fade">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span class="text-[10px] font-black uppercase text-emerald-500 tracking-widest">Leitura Estrutural do Território</span>
                     </div>
+                    <p id="insight-box" class="text-sm italic text-slate-400 leading-relaxed font-medium">
+                        Sistema aguardando seleção de território para decodificação de influências.
+                    </p>
                 </div>
             </section>
 
-            <aside class="w-96 border-l border-white/5 p-8 flex flex-col">
-                <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Ações Táticas (S1)</h3>
-                <div id="action-list" class="flex-1 space-y-4 overflow-y-auto mb-6 pr-2"></div>
-                <div class="relative">
-                    <textarea id="action-input" placeholder="Nova diretriz..." class="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-white focus:outline-none focus:border-emerald-500 transition-all"></textarea>
-                    <button onclick="addAction()" class="absolute bottom-4 right-4 bg-emerald-600 p-2 rounded-xl text-white">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <aside class="w-96 border-l border-white/5 p-8 flex flex-col bg-black/20">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Plano de Ação (S1)</h3>
+                    <span class="text-[9px] font-black bg-white/5 px-2 py-1 rounded">EXECUÇÃO</span>
+                </div>
+                
+                <div id="action-list" class="flex-1 space-y-4 overflow-y-auto mb-8 pr-2 custom-scroll"></div>
+                
+                <div class="relative group">
+                    <textarea id="action-input" placeholder="Nova diretriz estratégica..." class="w-full bg-white/5 border border-white/10 rounded-3xl p-5 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all resize-none shadow-inner" rows="3"></textarea>
+                    <button onclick="addAction()" class="absolute bottom-4 right-4 bg-emerald-600 hover:bg-emerald-500 p-3 rounded-2xl text-white transition-all active:scale-90 shadow-lg shadow-emerald-900/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                 </div>
             </aside>
@@ -124,7 +140,7 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE PADRONIZADA
+        // CONFIGURAÇÃO SUPABASE PADRONIZADA (V4)
         const SUPABASE_URL = 'https://jwpncdkrzjlieuaaqyto.supabase.co';
         const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3cG5jZGtyempsaWV1YWFxeXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MjUyNTcsImV4cCI6MjA5MDMwMTI1N30.OkyVSFHGL7IHMtE6Y2V7KLFgdkfAyT-YHXBCh_vq9Pw';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -142,34 +158,39 @@
             {id:'M1', n:'Prova'}, {id:'M2', n:'Comparação'}, {id:'M3', n:'Intuição'}, {id:'M4', n:'Valores'}
         ];
 
-        // --- MOTOR DE AUTENTICAÇÃO ---
+        // --- MOTOR DE AUTENTICAÇÃO (S1/M2/B3) ---
         function setAuthMode(mode) {
             authMode = mode;
             document.getElementById('btn-mode-login').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode==='login' ? 'bg-white text-black' : 'text-slate-400'}`;
             document.getElementById('btn-mode-signup').className = `flex-1 py-2 text-[10px] font-black rounded-xl ${mode==='signup' ? 'bg-white text-black' : 'text-slate-400'}`;
             document.getElementById('signup-fields').classList.toggle('hidden', mode==='login');
-            document.getElementById('btn-exec').innerText = mode==='login' ? 'ACESSAR TERMINAL' : 'FINALIZAR REGISTRO';
+            document.getElementById('btn-exec').innerText = mode==='login' ? 'ACESSAR TERMINAL' : 'FINALIZAR REGISTRO BSM';
         }
 
         document.getElementById('main-auth-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const msg = document.getElementById('auth-msg');
+            const btn = document.getElementById('btn-exec');
             
-            // Validação de Sufixo
+            btn.disabled = true;
+            btn.innerText = "PROCESSANDO...";
+
             const suffix = password.slice(-2);
             const roleBySuffix = suffix === 'S1' ? 'S' : suffix === 'M2' ? 'M' : suffix === 'B3' ? 'B' : null;
 
             if(!roleBySuffix) {
-                showMsg("ERRO: Senha deve terminar em S1, M2 ou B3.", "rose");
+                showMsg("ERRO: Senha inválida. Use o sufixo do seu nível (S1, M2 ou B3).", "rose");
+                btn.disabled = false;
+                btn.innerText = "TENTAR NOVAMENTE";
                 return;
             }
 
             if(authMode === 'signup') {
                 const selectedRole = document.getElementById('role-select').value;
                 if(selectedRole !== roleBySuffix) {
-                    showMsg(`ERRO: Sufixo ${suffix} não condiz com nível selecionado.`, "rose");
+                    showMsg(`ERRO: O sufixo ${suffix} não corresponde ao nível selecionado.`, "rose");
+                    btn.disabled = false;
                     return;
                 }
 
@@ -178,20 +199,27 @@
                     options: { data: { role: selectedRole, suffix: suffix } }
                 });
                 if(error) showMsg(error.message, "rose");
-                else showMsg("Sucesso! Verifique seu e-mail.", "emerald");
+                else showMsg("Registro concluído! Verifique seu e-mail.", "emerald");
             } else {
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if(error) showMsg("Falha no login. Verifique as credenciais.", "rose");
-                else {
-                    initApp(data.user, suffix);
-                }
+                if(error) showMsg("Credenciais incorretas ou falha de conexão.", "rose");
+                else initApp(data.user, suffix);
             }
+            btn.disabled = false;
         };
+
+        async function recoverPassword() {
+            const email = document.getElementById('email').value;
+            if(!email) return showMsg("Insira seu e-mail para recuperar.", "rose");
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            if(error) showMsg(error.message, "rose");
+            else showMsg("Link de recuperação enviado com sucesso!", "emerald");
+        }
 
         function showMsg(t, c) {
             const m = document.getElementById('auth-msg');
             m.innerText = t;
-            m.className = `text-[10px] font-black text-center p-3 rounded-xl uppercase tracking-tighter bg-${c}-500/10 text-${c}-500 border border-${c}-500/20`;
+            m.className = `text-[10px] font-black text-center p-4 rounded-xl uppercase tracking-tighter bg-${c}-500/10 text-${c}-500 border border-${c}-500/20 animate-fade`;
             m.classList.remove('hidden');
         }
 
@@ -204,7 +232,7 @@
             document.getElementById('role-badge').innerText = suffix;
             document.getElementById('user-display').innerText = user.email;
 
-            // Bloqueio de Funções por Nível
+            // Permissões de Interface
             if(currentRole === 'M' || currentRole === 'B') document.getElementById('manager-tools').classList.remove('hidden');
             if(currentRole === 'B') document.getElementById('business-tools').classList.remove('hidden');
 
@@ -212,16 +240,19 @@
             renderRadar();
         }
 
-        // --- MOTOR DE DADOS ---
+        // --- GESTÃO DE DADOS ---
         async function loadAccounts() {
             const { data } = await supabase.from('accounts').select('*').order('created_at', {ascending:false});
             if(data) {
                 accounts = data;
                 const list = document.getElementById('acc-list');
                 list.innerHTML = accounts.map(a => `
-                    <div onclick="selectAcc('${a.id}')" class="p-4 glass rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-all ${activeAccId === a.id ? 'border-emerald-500 bg-emerald-500/5' : ''}">
-                        <div class="text-[11px] font-black text-white">${a.name}</div>
-                        <div class="text-[9px] mono text-slate-500 mt-1">R$ ${Number(a.valor).toLocaleString()}</div>
+                    <div onclick="selectAcc('${a.id}')" class="p-5 glass rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-all group ${activeAccId === a.id ? 'border-emerald-500 bg-emerald-500/10' : ''}">
+                        <div class="flex justify-between items-start">
+                            <div class="text-[11px] font-black text-white uppercase group-hover:text-emerald-400 transition-colors">${a.name}</div>
+                            <div class="text-[8px] font-black bg-white/5 px-2 py-0.5 rounded text-slate-500">${a.status}</div>
+                        </div>
+                        <div class="text-[10px] mono text-slate-500 mt-2 tracking-tighter">EST: R$ ${Number(a.valor).toLocaleString()}</div>
                     </div>
                 `).join('');
             }
@@ -234,18 +265,17 @@
             await loadInfluences();
             await loadActions();
             processBSM();
-            loadAccounts(); // Update visual selection
+            loadAccounts();
         }
 
-        // --- MOTOR BSM™ (RADAR & LÓGICA) ---
+        // --- RADAR ENGINE ---
         function renderRadar() {
             const svg = document.getElementById('radar-svg');
-            const center = 260, r = 220, inner = 90;
+            const center = 275, r = 240, inner = 110;
 
             VECTORS.forEach((v, i) => {
                 const start = (i * 30 - 90) * (Math.PI / 180);
                 const end = ((i + 1) * 30 - 90) * (Math.PI / 180);
-                
                 const d = `
                     M ${center + r * Math.cos(start)} ${center + r * Math.sin(start)}
                     A ${r} ${r} 0 0 1 ${center + r * Math.cos(end)} ${center + r * Math.sin(end)}
@@ -260,13 +290,12 @@
                 p.onclick = () => toggleVector(v.id);
                 svg.appendChild(p);
 
-                // Labels
                 const ang = (i * 30 - 75) * (Math.PI / 180);
                 const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                t.setAttribute("x", center + (r + 20) * Math.cos(ang));
-                t.setAttribute("y", center + (r + 20) * Math.sin(ang));
+                t.setAttribute("x", center + (r + 25) * Math.cos(ang));
+                t.setAttribute("y", center + (r + 25) * Math.sin(ang));
                 t.setAttribute("text-anchor", "middle");
-                t.setAttribute("class", "fill-slate-600 text-[10px] font-black mono");
+                t.setAttribute("class", "fill-slate-600 text-[10px] font-black mono tracking-tighter");
                 t.textContent = v.id;
                 svg.appendChild(t);
             });
@@ -294,19 +323,20 @@
             document.getElementById('gravit-percent').innerText = g + '%';
             
             const box = document.getElementById('insight-box');
-            if(ativos > 8) box.innerText = "ALERTA: Inércia máxima. O território não converterá sem a remoção imediata de B1 e B3.";
-            else if(g > 70) box.innerText = "ZONA DE EVENTO: Gravidade favorável. Concentre esforços em M1 (Prova) para fechamento.";
-            else box.innerText = "OPERACIONAL: Remova as barreiras táticas para aumentar a força gravitacional.";
+            if(ativos > 8) box.innerText = "ESTRUTURA TRAVADA: O território apresenta inércia estrutural crítica. A conversão é improvável sem reduzir os bloqueios B1 e B3 imediatamente.";
+            else if(g > 70) box.innerText = "HORIZONTE DE EVENTOS: Força gravitacional otimizada. Foque na validação de M1 (Prova) para colapsar a decisão do cliente.";
+            else box.innerText = "ANÁLISE ATIVA: Remova as barreiras sociais (S1-S4) para acelerar a tração do território.";
 
             VECTORS.forEach(v => {
                 const el = document.getElementById(`vec-${v.id}`);
+                if(!el) return;
                 const state = influences.find(i => i.influence_code === v.id)?.state || 'neutro';
                 el.style.fill = state === 'ativo' ? 'rgba(244,63,94,0.4)' : state === 'removido' ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.05)';
                 el.style.stroke = state === 'ativo' ? '#f43f5e' : state === 'removido' ? '#10b981' : 'rgba(255,255,255,0.1)';
             });
         }
 
-        // --- AUXILIARES ---
+        // --- AUXILIARES & AÇÕES ---
         async function loadInfluences() {
             const { data } = await supabase.from('influences').select('*').eq('account_id', activeAccId);
             influences = data || [];
@@ -316,8 +346,9 @@
             const { data } = await supabase.from('actions').select('*').eq('account_id', activeAccId).order('created_at', {ascending:false});
             if(data) {
                 document.getElementById('action-list').innerHTML = data.map(a => `
-                    <div class="p-4 glass rounded-2xl border-l-4 border-emerald-500 animate-slideUp">
-                        <p class="text-[11px] text-slate-300 font-medium">${a.description}</p>
+                    <div class="p-5 glass rounded-3xl border-l-4 border-emerald-500 animate-fade">
+                        <div class="text-[8px] font-black text-slate-500 mb-1 uppercase tracking-widest">${new Date(a.created_at).toLocaleDateString()}</div>
+                        <p class="text-[11px] text-slate-200 font-medium leading-relaxed">${a.description}</p>
                     </div>
                 `).join('');
             }
@@ -333,16 +364,9 @@
 
         async function logout() { await supabase.auth.signOut(); window.location.reload(); }
 
-        async function recoverPassword() {
-            const email = document.getElementById('email').value;
-            if(!email) return alert("Digite seu e-mail.");
-            await supabase.auth.resetPasswordForEmail(email);
-            alert("E-mail de recuperação enviado.");
-        }
-
         function newAccount() {
-            const name = prompt("Nome do Território:");
-            const valor = prompt("Valor Estimado:");
+            const name = prompt("Nome da Conta/Território:");
+            const valor = prompt("Valor Estratégico (Numérico):");
             if(name && valor) {
                 supabase.from('accounts').insert({ name, valor, user_id: currentUser.id }).then(() => loadAccounts());
             }
@@ -351,7 +375,6 @@
         window.onload = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if(session) {
-                // Recupera sufixo dos metadados salvos no registro
                 const suffix = session.user.user_metadata.suffix || 'S1';
                 initApp(session.user, suffix);
             }
